@@ -8,6 +8,7 @@ public class WeatherpickApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WeatherpickApplication.class, args);
+		System.out.println("test");
 	}
 
 }
