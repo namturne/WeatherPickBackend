@@ -29,6 +29,7 @@ public class UserEntity {
 
     @Column(nullable = false)
     private String PhoneNumber;
+
     //권한
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -73,6 +74,7 @@ public class UserEntity {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
+
 
     public Long getUser_key() {
         return user_key;

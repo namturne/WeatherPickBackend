@@ -2,6 +2,7 @@ package WeatherPick.weatherpick.domain.user.entity;
 
 
 
+
 public enum UserRoleType {
 
     ADMIN("어드민"),
@@ -16,4 +17,5 @@ public enum UserRoleType {
     public String toString() {
         return this.description;  // description 반환
     }
+
 }

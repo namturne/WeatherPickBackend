@@ -4,6 +4,7 @@ import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 
 import java.util.Date;
 
+
 public class UserResponseDto {
     private String username;
     private String nickname;
@@ -39,6 +40,7 @@ public class UserResponseDto {
     public void setPhonenumber(String phonenumber) {
         this.phonenumber = phonenumber;
     }
+
 
     public String getUsername() {
         return username;
