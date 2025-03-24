@@ -1,17 +1,21 @@
 package WeatherPick.weatherpick.domain.user.entity;
 
 
-import lombok.Getter;
 
-@Getter
+
 public enum UserRoleType {
 
-    ADMIN("어드민"),
-    USER("유저");
+    ADMIN("ADMIN"),
+    USER("USER");
 
     private final String description;
 
     UserRoleType(String description){
         this.description = description;
     }
+    @Override
+    public String toString() {
+        return this.description;  // description 반환
+    }
+
 }

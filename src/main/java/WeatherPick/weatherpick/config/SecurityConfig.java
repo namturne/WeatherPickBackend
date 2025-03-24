@@ -27,7 +27,8 @@ public class SecurityConfig {
     @Bean
     public RoleHierarchy roleHierarchy(){
         return RoleHierarchyImpl.withRolePrefix("ROLE_")
-                .role(UserRoleType.ADMIN.toString()).implies(UserRoleType.ADMIN.toString())
+                .role(UserRoleType.ADMIN.toString()).implies(UserRoleType.USER.toString())
+
                 .build();
     }
     // 시큐리티 설정
@@ -41,11 +42,24 @@ public class SecurityConfig {
         // 접근 경로별 인가 설정
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll());
-
+                        .requestMatchers("/login", "/user/join").permitAll() // login, /user/join 경로는 모든 사용자에게 허용
+                        .requestMatchers("/user/update/**").hasRole("USER") // /user/update/** 경로는 "USER" 역할을 가진 사용자만 허용.
+                        .anyRequest().authenticated()
+                );
         // 로그인 방식 설정 Form 로그인 방식
         http
-                .formLogin(Customizer.withDefaults());
+                .formLogin(login -> login
+                        .loginPage("/login") // 커스텀 로그인 페이지 지정
+                        .defaultSuccessUrl("/main") // 로그인 성공 시 이동할 페이지
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // 로그아웃 엔드포인트 설정
+                        .logoutSuccessUrl("/login")  // 로그아웃 후 이동할 페이지
+                        .invalidateHttpSession(true) // 세션 삭제
+                        .deleteCookies("JSESSIONID") // 쿠키 삭제
+                        .permitAll()
+                );
 
         return http.build();
     }
