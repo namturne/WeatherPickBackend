@@ -1,0 +1,38 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+<title>회원가입</title>
+</head>
+<body>
+    <h1>회원가입</h1>
+    <hr>
+    <form id="joinForm" action="/user/join" method="post" name="joinForm">
+        <input type="text" name="username" id="username" required placeholder="username"/>
+        <input type="password" name="password" id="password" required placeholder="password"/>
+        <input type="password" name="confirm-password" id="confirm-password" required placeholder="confirm-password"/>
+        <input type="text" name="nickname" id="nickname"required placeholder="nickname"/>
+        <input type="email" name="email" id="email" required placeholder="email"/>
+        <input type="text" name="name" id="name" required placeholder="name"/>
+        <input type="tel" name="phonenumber" id="phonenumber" required placeholder="010-1234-5678" pattern="^\d{3}-\d{4}-\d{4}$" />
+        <input type="submit" value="Join"/>
+        <p id="error-message" style="color: red;"></p>
+    </form>
+    <script>
+        document.getElementById('joinForm').addEventListener('submit', function(event) {
+          event.preventDefault();
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirm-password').value;
+          const errorMessage = document.getElementById('error-message');
+
+          if (password !== confirmPassword) {
+            errorMessage.textContent = '비밀번호가 일치하지 않습니다.';
+          } else {
+            errorMessage.textContent = '';
+            // 회원가입 로직 추가 (예: API 호출)
+            alert('가입이 완료되었습니다!');
+            document.getElementById('joinForm').submit();
+          }
+        });
+    </script>
+</body>
+</html>

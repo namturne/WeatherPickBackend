@@ -7,6 +7,26 @@ public class UserRequestDto {
     private String password;
     private String nickname;
     private String email;
+    private String name;
+    private String phonenumber;
+
+
+
+    public String getPhonenumber() {
+        return phonenumber;
+    }
+
+    public void setPhonenumber(String phonenumber) {
+        this.phonenumber = phonenumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
 
 

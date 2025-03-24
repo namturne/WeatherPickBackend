@@ -24,6 +24,12 @@ public class UserEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String PhoneNumber;
+
     //권한
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,8 +40,40 @@ public class UserEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdate = new Date();
 
+    @Column
+    private String profileImage;
 
 
+
+
+    public Date getCreatedate() {
+        return createdate;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhoneNumber() {
+        return PhoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        PhoneNumber = phoneNumber;
+    }
+
+    public String getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 
 
     public Long getUser_key() {
