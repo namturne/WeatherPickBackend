@@ -42,10 +42,10 @@ public class SecurityConfig {
         // 접근 경로별 인가 설정
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/join").permitAll() // /user/join 경로는 모든 사용자에게 허용
-                        .requestMatchers("/user/update/**").hasRole("USER") // /user/update/** 경로는 "USER" 역할을 가진 사용자만 허용
-
-
+                        .requestMatchers("/login", "/user/join").permitAll() // login, /user/join 경로는 모든 사용자에게 허용
+                        .requestMatchers("/user/update/**").hasRole("USER") // /user/update/** 경로는 "USER" 역할을 가진 사용자만 허용.
+                        .anyRequest().authenticated()
+                );
         // 로그인 방식 설정 Form 로그인 방식
         http
                 .formLogin(login -> login
