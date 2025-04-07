@@ -1,8 +1,5 @@
 package WeatherPick.weatherpick.domain.user.entity;
 
-
-
-
 public enum UserRoleType {
 
     ADMIN("ADMIN"),
