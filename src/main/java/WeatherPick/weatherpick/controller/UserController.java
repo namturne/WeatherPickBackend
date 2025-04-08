@@ -12,14 +12,24 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.util.Collections;
+import java.util.Map;
+import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+
+
+
 
 @Controller
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
     //바로 로그인 사이트로 보내기
     @GetMapping("/")
@@ -82,6 +92,23 @@ public class UserController {
         }
 
         return "redirect:/user/update/" + username;
+    }
+
+
+    // 아이디 중복 확인
+    @GetMapping("/user/check-username")
+    @ResponseBody
+    public Map<String, Boolean> checkUsername(@RequestParam String username) {
+        boolean exists = userRepository.existsByUsername(username);
+        return Collections.singletonMap("exists", exists);
+    }
+
+    // 이메일 중복 확인
+    @GetMapping("/user/check-email")
+    @ResponseBody
+    public Map<String, Boolean> checkEmail(@RequestParam String email) {
+        boolean exists = userRepository.existsByEmail(email);
+        return Collections.singletonMap("exists", exists);
     }
 
 }
