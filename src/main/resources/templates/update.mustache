@@ -13,6 +13,9 @@
     <input type="submit" value="Update"/>
     <p id="error-message" style="color: red;"></p>
 </form>
+<form action="/user/delete/{{USER.username}}" method="post" onsubmit="return confirm('정말로 삭제하시겠습니까?');">
+  <button type="submit">회원 삭제</button>
+</form>
 <a href="/main">
     <button type="button">메인으로</button>
 </a>
