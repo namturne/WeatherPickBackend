@@ -79,11 +79,11 @@ public class UserService implements UserDetailsService {
 
         // 중복 username이 있는지 확인
         if (userRepository.existsByUsername(username)) {
-            return;
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }
         // 중복 email이 있는지 확인
         if (userRepository.existsByEmail(email)) {
-            return;
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
 
@@ -159,7 +159,6 @@ public class UserService implements UserDetailsService {
     // 유저 한 명 삭제
     @Transactional
     public void deleteOneUser(String username) {
-
         userRepository.deleteByUsername(username);
     }
 
