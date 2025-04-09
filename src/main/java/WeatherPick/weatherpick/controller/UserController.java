@@ -111,7 +111,7 @@ public class UserController {
     // 아이디 중복 확인
     @GetMapping("/user/check-username")
     @ResponseBody
-    public Map<String, Boolean> checkUsername(@RequestParam String username) {
+    public Map<String, Boolean> checkUsername(@RequestParam("username") String username) {
         boolean exists = userRepository.existsByUsername(username);
         return Collections.singletonMap("exists", exists);
     }
@@ -119,7 +119,7 @@ public class UserController {
     // 이메일 중복 확인
     @GetMapping("/user/check-email")
     @ResponseBody
-    public Map<String, Boolean> checkEmail(@RequestParam String email) {
+    public Map<String, Boolean> checkEmail(@RequestParam("email") String email) {
         boolean exists = userRepository.existsByEmail(email);
         return Collections.singletonMap("exists", exists);
     }
