@@ -159,7 +159,6 @@ public class UserService implements UserDetailsService {
     // 유저 한 명 삭제
     @Transactional
     public void deleteOneUser(String username) {
-
         userRepository.deleteByUsername(username);
     }
 

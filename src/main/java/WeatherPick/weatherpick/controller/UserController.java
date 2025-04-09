@@ -84,7 +84,7 @@ public class UserController {
 
     // 회원 수정
     @PostMapping("/user/update/{username}")
-    public String updateProcess(@PathVariable String username, UserRequestDto dto) {
+    public String updateProcess(@PathVariable("username") String username, UserRequestDto dto) {
 
         // 본인 또는 ADMIN 권한만 접근 가능
         if (userService.isAccess(username)) {
@@ -92,6 +92,19 @@ public class UserController {
         }
 
         return "redirect:/user/update/" + username;
+    }
+    // 회원 삭제
+    @PostMapping("/user/delete/{username}")
+    public String deleteProcess(@PathVariable("username") String username){
+        // 본인 또는 ADMIN 권한만 접근 가능
+        if (userService.isAccess(username)) {
+            userService.deleteOneUser(username);
+        }
+        else {
+            return "redirect:/user/update/" + username;
+        }
+        return "redirect:/login";
+
     }
 
 
