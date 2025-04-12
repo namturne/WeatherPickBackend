@@ -29,4 +29,44 @@ public class PlaceEntity {
 
     @Column
     private int scrap_Count;
+
+    public Long getPlace_key() {
+        return place_key;
+    }
+
+    public void setPlace_key(Long place_key) {
+        this.place_key = place_key;
+    }
+
+    public String getPlace_name() {
+        return place_name;
+    }
+
+    public void setPlace_name(String place_name) {
+        this.place_name = place_name;
+    }
+
+    public Double getPlace_longitude() {
+        return place_longitude;
+    }
+
+    public void setPlace_longitude(Double place_longitude) {
+        this.place_longitude = place_longitude;
+    }
+
+    public int getScrap_Count() {
+        return scrap_Count;
+    }
+
+    public void setScrap_Count(int scrap_Count) {
+        this.scrap_Count = scrap_Count;
+    }
+
+    public Double getPlace_latitude() {
+        return place_latitude;
+    }
+
+    public void setPlace_latitude(Double place_latitude) {
+        this.place_latitude = place_latitude;
+    }
 }

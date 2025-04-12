@@ -21,11 +21,11 @@ public class ReviewCommentEntity {
     private Long review_comment_id;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "review_post_id",nullable = false)
     private ReviewPostEntity post;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_key",nullable = false)
     private UserEntity user;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -34,4 +34,43 @@ public class ReviewCommentEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date review_comment_createdAt = new Date();
 
+    public Long getReview_comment_id() {
+        return review_comment_id;
+    }
+
+    public void setReview_comment_id(Long review_comment_id) {
+        this.review_comment_id = review_comment_id;
+    }
+
+    public ReviewPostEntity getPost() {
+        return post;
+    }
+
+    public void setPost(ReviewPostEntity post) {
+        this.post = post;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public String getReview_comment_content() {
+        return review_comment_content;
+    }
+
+    public void setReview_comment_content(String review_comment_content) {
+        this.review_comment_content = review_comment_content;
+    }
+
+    public Date getReview_comment_createdAt() {
+        return review_comment_createdAt;
+    }
+
+    public void setReview_comment_createdAt(Date review_comment_createdAt) {
+        this.review_comment_createdAt = review_comment_createdAt;
+    }
 }

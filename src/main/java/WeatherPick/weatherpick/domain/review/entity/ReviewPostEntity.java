@@ -30,7 +30,7 @@ public class ReviewPostEntity {
     private String review_post_content;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_key", nullable = false)
     private UserEntity user; // 유저키 (fk)
 
     @ManyToOne
@@ -46,4 +46,67 @@ public class ReviewPostEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate = new Date();
 
+    public Long getReview_post_id() {
+        return review_post_id;
+    }
+
+    public void setReview_post_id(Long review_post_id) {
+        this.review_post_id = review_post_id;
+    }
+
+    public String getReview_post_title() {
+        return review_post_title;
+    }
+
+    public void setReview_post_title(String review_post_title) {
+        this.review_post_title = review_post_title;
+    }
+
+    public String getReview_post_content() {
+        return review_post_content;
+    }
+
+    public void setReview_post_content(String review_post_content) {
+        this.review_post_content = review_post_content;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public PlaceEntity getPlace() {
+        return place;
+    }
+
+    public void setPlace(PlaceEntity place) {
+        this.place = place;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public int getScrapCnt() {
+        return scrapCnt;
+    }
+
+    public void setScrapCnt(int scrapCnt) {
+        this.scrapCnt = scrapCnt;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
 }
