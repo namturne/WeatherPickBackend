@@ -50,7 +50,6 @@ public class UserEntity {
         return createdate;
     }
 
-
     public String getName() {
         return name;
     }
