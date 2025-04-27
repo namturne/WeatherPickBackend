@@ -52,7 +52,6 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-
     public boolean checkPassword(String username, String rawPassword) {
         // 사용자의 유저 정보 조회
         Optional<UserEntity> user = userRepository.findByUsername(username);
@@ -65,7 +64,6 @@ public class UserService implements UserDetailsService {
         // 저장된 암호화된 비밀번호와 사용자가 입력한 평문 비밀번호를 비교
         return bCryptPasswordEncoder.matches(rawPassword, user.get().getPassword());
     }
-
 
     //유저 한 명 생성
     @Transactional
