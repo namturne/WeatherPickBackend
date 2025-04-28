@@ -16,9 +16,9 @@ public class PlaceRegistgerService {
     public void registerPlace(PlaceRegisterDto placeRegisterDto) {
         PlaceEntity place = new PlaceEntity();
 
-        place.setPlace_name(placeRegisterDto.getPlaceName());
-        place.setPlace_latitude(placeRegisterDto.getLatitude());
-        place.setPlace_longitude(placeRegisterDto.getLongitude());
+        place.setplacename(placeRegisterDto.getPlaceName());
+        place.setplacelatitude(placeRegisterDto.getLatitude());
+        place.setplacelongitude(placeRegisterDto.getLongitude());
         place.setScrap_Count(0);
         placeRepository.save(place);
     }
