@@ -39,14 +39,14 @@ public class ReviewCommentService {
         ReviewCommentEntity comment = new ReviewCommentEntity();
         comment.setPost(post);
         comment.setUser(user);
-        comment.setReview_comment_content(commentDto.getReview_comment_content());
+        comment.setreviewcommentcontent(commentDto.getReview_comment_content());
 
         ReviewCommentEntity savedComment = commentRepository.save(comment);
         return new ReviewCommentDto(
-                savedComment.getReview_comment_id(),
+                savedComment.getreviewcomment_id(),
                 savedComment.getUser().getUsername(),
-                savedComment.getReview_comment_content(),
-                savedComment.getReview_comment_createdAt()
+                savedComment.getreviewcommentcontent(),
+                savedComment.getreviewcommentcreatedAt()
         );
     }
 
@@ -58,13 +58,13 @@ public class ReviewCommentService {
         if (!comment.getUser().getUser_key().equals(user.getUser_key())) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
-        comment.setReview_comment_content(commentDto.getReview_comment_content());
+        comment.setreviewcommentcontent(commentDto.getReview_comment_content());
         ReviewCommentEntity updatedComment = commentRepository.save(comment);
         return new ReviewCommentDto(
-                updatedComment.getReview_comment_id(),
+                updatedComment.getreviewcomment_id(),
                 updatedComment.getUser().getUsername(),
-                updatedComment.getReview_comment_content(),
-                updatedComment.getReview_comment_createdAt()
+                updatedComment.getreviewcommentcontent(),
+                updatedComment.getreviewcommentcreatedAt()
         );
     }
 

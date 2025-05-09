@@ -25,7 +25,7 @@ public class ReviewRatingEntity {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "review_post_id")
+    @JoinColumn(name = "reviewpost_id")
     private ReviewPostEntity post;
 
     @Column(nullable = false)

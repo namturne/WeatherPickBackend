@@ -18,10 +18,10 @@ created_at	    DATETIME	작성 시간
 public class ReviewCommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long review_comment_id;
+    private Long reviewcomment_id;
 
     @ManyToOne
-    @JoinColumn(name = "review_post_id",nullable = false)
+    @JoinColumn(name = "reviewpost_id",nullable = false)
     private ReviewPostEntity post;
 
     @ManyToOne
@@ -29,17 +29,17 @@ public class ReviewCommentEntity {
     private UserEntity user;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String review_comment_content;
+    private String reviewcommentcontent;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date review_comment_createdAt = new Date();
+    private Date reviewcommentcreatedAt = new Date();
 
-    public Long getReview_comment_id() {
-        return review_comment_id;
+    public Long getreviewcomment_id() {
+        return reviewcomment_id;
     }
 
-    public void setReview_comment_id(Long review_comment_id) {
-        this.review_comment_id = review_comment_id;
+    public void setreviewcomment_id(Long reviewcomment_id) {
+        this.reviewcomment_id = reviewcomment_id;
     }
 
     public ReviewPostEntity getPost() {
@@ -58,19 +58,19 @@ public class ReviewCommentEntity {
         this.user = user;
     }
 
-    public String getReview_comment_content() {
-        return review_comment_content;
+    public String getreviewcommentcontent() {
+        return reviewcommentcontent;
     }
 
-    public void setReview_comment_content(String review_comment_content) {
-        this.review_comment_content = review_comment_content;
+    public void setreviewcommentcontent(String reviewcommentcontent) {
+        this.reviewcommentcontent = reviewcommentcontent;
     }
 
-    public Date getReview_comment_createdAt() {
-        return review_comment_createdAt;
+    public Date getreviewcommentcreatedAt() {
+        return reviewcommentcreatedAt;
     }
 
-    public void setReview_comment_createdAt(Date review_comment_createdAt) {
-        this.review_comment_createdAt = review_comment_createdAt;
+    public void setreviewcommentcreatedAt(Date reviewcommentcreatedAt) {
+        this.reviewcommentcreatedAt = reviewcommentcreatedAt;
     }
 }

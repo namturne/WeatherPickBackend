@@ -21,13 +21,13 @@ created_at	    DATETIME	작성 시간
 public class ReviewPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long review_post_id; // 리뷰 게시글 ID (pk)
+    private Long reviewpost_id; // 리뷰 게시글 ID (pk)
 
     @Column(nullable = false)
-    private String review_post_title; // 제목
+    private String reviewposttitle; // 제목
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String review_post_content;
+    private String reviewpostcontent;
 
     @ManyToOne
     @JoinColumn(name = "user_key", nullable = false)
@@ -46,28 +46,28 @@ public class ReviewPostEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate = new Date();
 
-    public Long getReview_post_id() {
-        return review_post_id;
+    public Long getreviewpost_id() {
+        return reviewpost_id;
     }
 
-    public void setReview_post_id(Long review_post_id) {
-        this.review_post_id = review_post_id;
+    public void setreviewpost_id(Long reviewpost_id) {
+        this.reviewpost_id = reviewpost_id;
     }
 
-    public String getReview_post_title() {
-        return review_post_title;
+    public String getreviewposttitle() {
+        return reviewposttitle;
     }
 
-    public void setReview_post_title(String review_post_title) {
-        this.review_post_title = review_post_title;
+    public void setreviewposttitle(String reviewposttitle) {
+        this.reviewposttitle = reviewposttitle;
     }
 
-    public String getReview_post_content() {
-        return review_post_content;
+    public String getreviewpostcontent() {
+        return reviewpostcontent;
     }
 
-    public void setReview_post_content(String review_post_content) {
-        this.review_post_content = review_post_content;
+    public void setreviewpostcontent(String reviewpostcontent) {
+        this.reviewpostcontent = reviewpostcontent;
     }
 
     public UserEntity getUser() {

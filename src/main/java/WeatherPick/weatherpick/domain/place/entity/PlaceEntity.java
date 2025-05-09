@@ -3,7 +3,7 @@ package WeatherPick.weatherpick.domain.place.entity;
 import jakarta.persistence.*;
 /*
 필드명	        타입	            설명
-place_id (PK)	BIGINT	    장소 고유 식별자
+placeid (PK)	BIGINT	    장소 고유 식별자
 name	        VARCHAR	    장소 이름
 latitude	    DOUBLE	        위도
 longitude	    DOUBLE	        경도
@@ -19,39 +19,39 @@ public class PlaceEntity {
     private Long place_key;
 
     @Column(nullable = false)
-    private String place_name;
+    private String placename;
 
     @Column(nullable = false)
-    private Double place_latitude; // 위도
+    private Double placelatitude; // 위도
 
     @Column(nullable = false)
-    private Double place_longitude; // 경도
+    private Double placelongitude; // 경도
 
     @Column
     private int scrap_Count;
 
-    public Long getPlace_key() {
+    public Long getplacekey() {
         return place_key;
     }
 
-    public void setPlace_key(Long place_key) {
-        this.place_key = place_key;
+    public void setplacekey(Long placekey) {
+        this.place_key = placekey;
     }
 
-    public String getPlace_name() {
-        return place_name;
+    public String getplacename() {
+        return placename;
     }
 
-    public void setPlace_name(String place_name) {
-        this.place_name = place_name;
+    public void setplacename(String placename) {
+        this.placename = placename;
     }
 
-    public Double getPlace_longitude() {
-        return place_longitude;
+    public Double getplacelongitude() {
+        return placelongitude;
     }
 
-    public void setPlace_longitude(Double place_longitude) {
-        this.place_longitude = place_longitude;
+    public void setplacelongitude(Double placelongitude) {
+        this.placelongitude = placelongitude;
     }
 
     public int getScrap_Count() {
@@ -62,11 +62,11 @@ public class PlaceEntity {
         this.scrap_Count = scrap_Count;
     }
 
-    public Double getPlace_latitude() {
-        return place_latitude;
+    public Double getplacelatitude() {
+        return placelatitude;
     }
 
-    public void setPlace_latitude(Double place_latitude) {
-        this.place_latitude = place_latitude;
+    public void setplacelatitude(Double placelatitude) {
+        this.placelatitude = placelatitude;
     }
 }
