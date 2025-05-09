@@ -8,6 +8,7 @@ name	        VARCHAR	    장소 이름
 latitude	    DOUBLE	        위도
 longitude	    DOUBLE	        경도
 category	    VARCHAR	        카페, 식당 등
+address         VARCHAR         도로명 주소
 avg_rating	    FLOAT	        평균 별점
 scrap_count	    INT	            스크랩 횟수
  */
@@ -27,6 +28,12 @@ public class PlaceEntity {
     @Column(nullable = false)
     private Double placelongitude; // 경도
 
+    @Column(nullable = false)
+    private String category;
+
+    @Column(nullable = false)
+    private String address;
+
     @Column
     private int scrap_Count;
 
@@ -44,6 +51,22 @@ public class PlaceEntity {
 
     public void setplacename(String placename) {
         this.placename = placename;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public Double getplacelongitude() {
