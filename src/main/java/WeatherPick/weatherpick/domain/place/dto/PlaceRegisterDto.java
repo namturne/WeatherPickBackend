@@ -5,6 +5,12 @@ public class PlaceRegisterDto {
     private Double latitude;
     private Double longitude;
     private int scrap_cnt = 0;
+    private String category;
+    private String address;
+
+    //생성자 추가
+    public PlaceRegisterDto(String getplacename, Double getplacelatitude, Double getplacelongitude, String category, String address, int scrapCount) {
+    }
 
     public String getPlaceName() {
         return placeName;
@@ -36,5 +42,22 @@ public class PlaceRegisterDto {
 
     public void setScrap_cnt(int scrap_cnt) {
         this.scrap_cnt = scrap_cnt;
+    }
+
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

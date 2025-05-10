@@ -8,18 +8,28 @@
 <h2>장소 등록</h2>
 <form id="placeForm">
     <input type="text" id="name" placeholder="장소 이름" required><br>
+    <input type="text" id="address" placeholder="주소" required><br>
     <input type="text" id="latitude" placeholder="위도" required><br>
     <input type="text" id="longitude" placeholder="경도" required><br>
     <input type="text" id="category" placeholder="카테고리" required><br>
+
     <button type="submit">등록</button>
 </form>
 
+<hr>
+
+<h2>장소 목록</h2>
+<button onclick = "loadPlaces()">불러오기</button>
+<ul id="placeList"></ul>
+
 <script>
+    //장소등록
     document.getElementById('placeForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
         const data = {
             name: document.getElementById('name').value,
+            address: document.getElementById('address').value,
             latitude: parseFloat(document.getElementById('latitude').value),
             longitude: parseFloat(document.getElementById('longitude').value),
             category: document.getElementById('category').value
@@ -40,9 +50,41 @@
             body: JSON.stringify(data)
         })
                 .then(res => res.text())
-                .then(alert)
+                .then(msg => {
+                    alert(msg);
+                    loadPlaces();
+                })
                 .catch(console.error);
     });
+
+
+    // 장소 목록 조회
+    function loadPlaces() {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            alert("로그인이 필요합니다");
+            return;
+        }
+
+        fetch('/place/all', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+                .then(res = res.json())
+                .then(data => {
+                    const list = document.getElementById('placeList');
+                    list.innerHTML = '';
+                    data.forEach(p => {
+                        const li = document.createElement('li');
+                        li.textContent =
+                                `[${p.category}] ${p.name} - 주소: ${p.address}, 위도: ${p.latitude}, 경도: ${p.longitude}`;
+                        list.appendChild(li);
+                    });
+                })
+                .catch(console.error);
+    }
 </script>
 </body>
 </html>
