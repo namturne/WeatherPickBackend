@@ -25,14 +25,17 @@ jobs:
             echo "[2] Pull latest code"
             git pull origin main
 
-            echo "[3] Stop old container"
+            echo "[3] Build the project"
+            ./gradlew build
+            
+            echo "[4] Stop old container"
             docker stop weatherpick-container || true
             docker rm weatherpick-container || true
-
-            echo "[4] Build new image"
+            
+            echo "[5] Build new image"
             docker build -t weatherpick-app .
 
-            echo "[5] Run new container"
+            echo "[6] Run new container"
             docker run -d --name weatherpick-container \
               -p 8080:8080 \
               weatherpick-app
