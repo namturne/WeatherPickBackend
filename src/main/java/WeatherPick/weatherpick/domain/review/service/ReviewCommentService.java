@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /*
-댓글 (등록, 수정, 삭제)
+댓글 (등록, 수정, 삭제, 조회)
 */
 
 @Service
@@ -76,5 +76,19 @@ public class ReviewCommentService {
             throw new RuntimeException("삭제 권한이 없습니다.");
         }
         commentRepository.delete(comment);
+    }
+
+    // 특정 게시글의 댓글 목록 조회
+    public List<ReviewCommentDto> getCommentsByPostId(Long postId) {
+        List<ReviewCommentEntity> comments = commentRepository.findByPostId(postId);
+
+        return comments.stream()
+                .map(comment -> new ReviewCommentDto(
+                        comment.getreviewcomment_id(),
+                        comment.getUser().getUsername(),
+                        comment.getreviewcommentcontent(),
+                        comment.getreviewcommentcreatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }
