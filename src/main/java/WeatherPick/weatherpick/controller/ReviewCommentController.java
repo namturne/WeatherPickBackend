@@ -13,6 +13,7 @@ import java.util.List;
  - POST   /api/comments/{postId}    : 댓글 등록 (로그인된 사용자만 가능)
  - PUT    /api/comments/{commentId} : 댓글 수정 (본인만 수정 가능)
  - DELETE /api/comments/{commentId} : 댓글 삭제 (본인만 삭제 가능)
+ - SELECT /api/comments/{postId}    : 댓글 조회 (본인만 조회 가능)
 */
 
 @RestController
@@ -23,6 +24,13 @@ public class ReviewCommentController {
 
     public ReviewCommentController(ReviewCommentService commentService) {
         this.commentService = commentService;
+    }
+
+    // 댓글 조회: 특정 게시글(postId)에 달린 댓글 목록 조회
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<ReviewCommentDto>> getCommentsByPostId(@PathVariable Long postId) {
+        List<ReviewCommentDto> comments = commentService.getCommentsByPostId(postId);
+        return ResponseEntity.ok(comments);
     }
 
     // POST 요청: 특정 게시글(postId)에 새 댓글 등록 (인증된 사용자)
