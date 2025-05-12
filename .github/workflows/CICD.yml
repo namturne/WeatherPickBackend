@@ -46,7 +46,7 @@ jobs:
       - name: SSH and deploy backend container
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: 43.201.85.29
+          host: 43.201.86.7
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
