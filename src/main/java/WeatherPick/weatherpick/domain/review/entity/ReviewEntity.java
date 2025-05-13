@@ -6,34 +6,33 @@ import jakarta.persistence.*;
 public class ReviewEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long review_id;
+    @Column(name = "review_id")
+    private Long id;
 
-    @Column(nullable = false)
-    private String reviewcontent;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @Column(nullable = false)
     private int rating; //별점 (1~5)
 
-    public Long getReview_id() {
-        return review_id;
+    // ─── getters / setters ───
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setReview_id(Long review_id) {
-        this.review_id = review_id;
+    public String getContent() {
+        return content;
     }
-
-    public String getReviewcontent() {
-        return reviewcontent;
-    }
-
-    public void setReviewcontent(String reviewcontent) {
-        this.reviewcontent = reviewcontent;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public int getRating() {
         return rating;
     }
-
     public void setRating(int rating) {
         this.rating = rating;
     }

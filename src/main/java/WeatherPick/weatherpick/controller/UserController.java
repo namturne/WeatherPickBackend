@@ -37,12 +37,14 @@ public class UserController {
     public String loginPage() {
         return "login";
     }
-    @PostMapping("/login")
-    public String loginProcess(UserLoginDto dto) {
-        userService.checkPassword(dto.getUsername(),dto.getPassword());
 
-        return "redirect:/login";
-    }
+// RestAPI
+//    @PostMapping("/login")
+//    public String loginProcess(UserLoginDto dto) {
+//        userService.checkPassword(dto.getUsername(),dto.getPassword());
+//
+//        return "redirect:/login";
+//    }
 
 
     @GetMapping("/main")

@@ -50,7 +50,7 @@ public class SecurityConfig {
         http
                 .formLogin(login -> login
                         .loginPage("/login") // 커스텀 로그인 페이지 지정
-                        .defaultSuccessUrl("/main") // 로그인 성공 시 이동할 페이지
+                        .defaultSuccessUrl("/main", true) // 로그인 성공 시 이동할 페이지
                         .permitAll()
                 )
                 .logout(logout -> logout

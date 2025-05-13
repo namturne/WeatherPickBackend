@@ -6,6 +6,8 @@ import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 import java.util.List;
 
 /*
@@ -19,46 +21,39 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/comments")
 public class ReviewCommentController {
+    private final ReviewCommentService service;
 
-    private final ReviewCommentService commentService;
-
-    public ReviewCommentController(ReviewCommentService commentService) {
-        this.commentService = commentService;
+    public ReviewCommentController(ReviewCommentService service) {
+        this.service = service;
     }
 
-    // 댓글 조회: 특정 게시글(postId)에 달린 댓글 목록 조회
     @GetMapping("/post/{postId}")
-    public ResponseEntity<List<ReviewCommentDto>> getCommentsByPostId(@PathVariable Long postId) {
-        List<ReviewCommentDto> comments = commentService.getCommentsByPostId(postId);
-        return ResponseEntity.ok(comments);
+    public ResponseEntity<List<ReviewCommentDto>> getComments(@PathVariable Long postId) {
+        return ResponseEntity.ok(service.getCommentsByPostId(postId));
     }
 
-    // POST 요청: 특정 게시글(postId)에 새 댓글 등록 (인증된 사용자)
     @PostMapping("/{postId}")
     public ResponseEntity<ReviewCommentDto> addComment(
             @PathVariable Long postId,
-            @RequestBody ReviewCommentDto commentDto,
+            @RequestBody ReviewCommentDto dto,
             @AuthenticationPrincipal UserEntity user) {
-        ReviewCommentDto savedComment = commentService.addComment(postId, commentDto, user);
-        return ResponseEntity.ok(savedComment);
+        ReviewCommentDto saved = service.addComment(postId, dto, user);
+        return ResponseEntity.created(URI.create("/api/comments/" + saved.getId())).body(saved);
     }
 
-    // PUT 요청: 특정 댓글(commentId) 수정 (작성자 본인만 가능)
     @PutMapping("/{commentId}")
     public ResponseEntity<ReviewCommentDto> updateComment(
             @PathVariable Long commentId,
-            @RequestBody ReviewCommentDto commentDto,
+            @RequestBody ReviewCommentDto dto,
             @AuthenticationPrincipal UserEntity user) {
-        ReviewCommentDto updatedComment = commentService.updateComment(commentId, commentDto, user);
-        return ResponseEntity.ok(updatedComment);
+        return ResponseEntity.ok(service.updateComment(commentId, dto, user));
     }
 
-    // DELETE 요청: 특정 댓글(commentId) 삭제 (작성자 본인만 가능)
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> deleteComment(
+    public ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserEntity user) {
-        commentService.deleteComment(commentId, user);
-        return ResponseEntity.ok().build();
+        service.deleteComment(commentId, user);
+        return ResponseEntity.noContent().build();
     }
 }
