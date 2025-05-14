@@ -6,11 +6,12 @@ import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
 import WeatherPick.weatherpick.domain.review.repository.ReviewCommentRepository;
 import WeatherPick.weatherpick.domain.review.repository.ReviewPostRepository;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
-import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 /*
 댓글 (등록, 수정, 삭제, 조회)
@@ -18,77 +19,61 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReviewCommentService {
+    private final ReviewCommentRepository commentRepo;
+    private final ReviewPostRepository postRepo;
 
-    private final ReviewCommentRepository commentRepository;
-    private final ReviewPostRepository postRepository;
-    private final UserRepository userRepository;
-
-    public ReviewCommentService(ReviewCommentRepository commentRepository,
-                                ReviewPostRepository postRepository,
-                                UserRepository userRepository) {
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
+    public ReviewCommentService(ReviewCommentRepository commentRepo,
+                                ReviewPostRepository postRepo) {
+        this.commentRepo = commentRepo;
+        this.postRepo = postRepo;
     }
 
-    // 댓글 등록: 특정 리뷰 게시글에 댓글 추가
-    public ReviewCommentDto addComment(Long postId, ReviewCommentDto commentDto, UserEntity user) {
-        ReviewPostEntity post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
-
-        ReviewCommentEntity comment = new ReviewCommentEntity();
-        comment.setPost(post);
-        comment.setUser(user);
-        comment.setreviewcommentcontent(commentDto.getReview_comment_content());
-
-        ReviewCommentEntity savedComment = commentRepository.save(comment);
+    private ReviewCommentDto toDto(ReviewCommentEntity e) {
         return new ReviewCommentDto(
-                savedComment.getreviewcomment_id(),
-                savedComment.getUser().getUsername(),
-                savedComment.getreviewcommentcontent(),
-                savedComment.getreviewcommentcreatedAt()
+                e.getId(), e.getUser().getUsername(),
+                e.getContent(), e.getCreatedDate()
         );
     }
 
-
-    // 댓글 수정: 댓글 작성자와 인증된 유저가 일치하는 경우에만 수정 가능
-    public ReviewCommentDto updateComment(Long commentId, ReviewCommentDto commentDto, UserEntity user) {
-        ReviewCommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글이 존재하지 않습니다."));
-        if (!comment.getUser().getUser_key().equals(user.getUser_key())) {
-            throw new RuntimeException("수정 권한이 없습니다.");
-        }
-        comment.setreviewcommentcontent(commentDto.getReview_comment_content());
-        ReviewCommentEntity updatedComment = commentRepository.save(comment);
-        return new ReviewCommentDto(
-                updatedComment.getreviewcomment_id(),
-                updatedComment.getUser().getUsername(),
-                updatedComment.getreviewcommentcontent(),
-                updatedComment.getreviewcommentcreatedAt()
-        );
-    }
-
-    // 댓글 삭제: 댓글 작성자와 인증된 유저가 일치하는 경우에만 삭제 가능
-    public void deleteComment(Long commentId, UserEntity user) {
-        ReviewCommentEntity comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("댓글이 존재하지 않습니다."));
-        if (!comment.getUser().getUser_key().equals(user.getUser_key())) {
-            throw new RuntimeException("삭제 권한이 없습니다.");
-        }
-        commentRepository.delete(comment);
-    }
-
-    // 특정 게시글의 댓글 목록 조회
+    // 댓글 조회
+    @Transactional(readOnly = true)
     public List<ReviewCommentDto> getCommentsByPostId(Long postId) {
-        List<ReviewCommentEntity> comments = commentRepository.findByPostId(postId);
+        return commentRepo.findByPost_Id(postId)
+                .stream().map(this::toDto).collect(Collectors.toList());
+    }
 
-        return comments.stream()
-                .map(comment -> new ReviewCommentDto(
-                        comment.getreviewcomment_id(),
-                        comment.getUser().getUsername(),
-                        comment.getreviewcommentcontent(),
-                        comment.getreviewcommentcreatedAt()
-                ))
-                .collect(Collectors.toList());
+    // 댓글 등록
+    @Transactional
+    public ReviewCommentDto addComment(Long postId, ReviewCommentDto dto, UserEntity user) {
+        ReviewPostEntity post = postRepo.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
+        ReviewCommentEntity c = new ReviewCommentEntity();
+        c.setPost(post);
+        c.setUser(user);
+        c.setContent(dto.getContent());
+        return toDto(commentRepo.save(c));
+    }
+
+    // 댓글 수정
+    @Transactional
+    public ReviewCommentDto updateComment(Long id, ReviewCommentDto dto, UserEntity user) {
+        ReviewCommentEntity c = commentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("댓글이 없습니다."));
+        if (!c.getUser().getUserKey().equals(user.getUserKey())) {
+            throw new AccessDeniedException("수정 권한이 없습니다.");
+        }
+        c.setContent(dto.getContent());
+        return toDto(commentRepo.save(c));
+    }
+
+    // 댓글 삭제
+    @Transactional
+    public void deleteComment(Long id, UserEntity user) {
+        ReviewCommentEntity c = commentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("댓글이 없습니다."));
+        if (!c.getUser().getUserKey().equals(user.getUserKey())) {
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
+        commentRepo.delete(c);
     }
 }

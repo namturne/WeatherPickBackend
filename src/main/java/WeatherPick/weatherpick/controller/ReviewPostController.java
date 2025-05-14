@@ -2,37 +2,53 @@ package WeatherPick.weatherpick.controller;
 
 import WeatherPick.weatherpick.domain.review.dto.ReviewPostDto;
 import WeatherPick.weatherpick.domain.review.service.ReviewPostService;
-
+import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/posts")
 public class ReviewPostController {
+    private final ReviewPostService service;
 
-    private final ReviewPostService postService;
-
-    public ReviewPostController(ReviewPostService postService) {
-        this.postService = postService;
+    public ReviewPostController(ReviewPostService service) {
+        this.service = service;
     }
 
-    // 내가 쓴 글 목록
     @GetMapping("/mine")
-    public ResponseEntity<List<ReviewPostDto>> getMyPosts(
-            @AuthenticationPrincipal UserDetails me
-    ) {
-        return ResponseEntity.ok(postService.getMyPosts(me.getUsername()));
+    public ResponseEntity<?> getMyPosts(@AuthenticationPrincipal UserEntity user) {
+        return ResponseEntity.ok(service.getMyPosts(user.getUsername()));
     }
 
-    // 내가 스크랩한 글 목록
     @GetMapping("/scraps")
-    public ResponseEntity<List<ReviewPostDto>> getMyScraps(
-            @AuthenticationPrincipal UserDetails me
-    ) {
-        return ResponseEntity.ok(postService.getMyScraps(me.getUsername()));
+    public ResponseEntity<?> getMyScraps(@AuthenticationPrincipal UserEntity user) {
+        return ResponseEntity.ok(service.getMyScraps(user.getUsername()));
+    }
+
+    @PostMapping
+    public ResponseEntity<ReviewPostDto> createPost(
+            @RequestBody ReviewPostDto dto,
+            @AuthenticationPrincipal UserEntity user) {
+        ReviewPostDto saved = service.createPost(dto, user);
+        return ResponseEntity.created(URI.create("/api/posts/" + saved.getId())).body(saved);
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<ReviewPostDto> updatePost(
+            @PathVariable Long postId,
+            @RequestBody ReviewPostDto dto,
+            @AuthenticationPrincipal UserEntity user) {
+        return ResponseEntity.ok(service.updatePost(postId, dto, user));
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserEntity user) {
+        service.deletePost(postId, user);
+        return ResponseEntity.noContent().build();
     }
 }

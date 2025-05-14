@@ -11,7 +11,8 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long user_key;  //유저키
+    @Column(name = "user_key")
+    private Long userKey;  //유저키
 
     //아이디 , 비번
     @Column(nullable = false, unique = true)
@@ -75,12 +76,12 @@ public class UserEntity {
     }
 
 
-    public Long getUser_key() {
-        return user_key;
+    public Long getUserKey() {
+        return userKey;
     }
 
-    public void setUser_key(Long user_key) {
-        this.user_key = user_key;
+    public void setUserKey(Long user_key) {
+        this.userKey = user_key;
     }
 
     public String getUsername() {

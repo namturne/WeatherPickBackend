@@ -3,6 +3,7 @@ package WeatherPick.weatherpick.domain.review.entity;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 
+
 //게시글 별점
 /*
 필드명	        타입	            설명
@@ -17,52 +18,32 @@ is_scraped	    BOOLEAN	        사용자가 해당 리뷰를 스크랩했는지 
 @Entity
 @IdClass(ReviewRatingKey.class)
 public class ReviewRatingEntity {
-
     @Id
     @ManyToOne
-    @JoinColumn(name = "user_key")
+    @JoinColumn(name = "user_key", nullable = false)
     private UserEntity user;
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "reviewpost_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private ReviewPostEntity post;
 
     @Column(nullable = false)
     private Integer rating;
 
     @Column(nullable = false)
-    private Boolean isScraped;
+    private Boolean scraped;
 
-    public UserEntity getUser() {
-        return user;
-    }
+    // ─── getters/setters ───
+    public UserEntity getUser() { return user; }
+    public void setUser(UserEntity user) { this.user = user; }
 
-    public void setUser(UserEntity user) {
-        this.user = user;
-    }
+    public ReviewPostEntity getPost() { return post; }
+    public void setPost(ReviewPostEntity post) { this.post = post; }
 
-    public ReviewPostEntity getPost() {
-        return post;
-    }
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) { this.rating = rating; }
 
-    public void setPost(ReviewPostEntity post) {
-        this.post = post;
-    }
-
-    public Integer getRating() {
-        return rating;
-    }
-
-    public void setRating(Integer rating) {
-        this.rating = rating;
-    }
-
-    public Boolean getScraped() {
-        return isScraped;
-    }
-
-    public void setScraped(Boolean scraped) {
-        isScraped = scraped;
-    }
+    public Boolean getScraped() { return scraped; }
+    public void setScraped(Boolean scraped) { this.scraped = scraped; }
 }
