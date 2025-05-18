@@ -1,7 +1,9 @@
 package WeatherPick.weatherpick.domain.user.dto;
 
 
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public class UserRequestDto {
     private String username;
     private String password;

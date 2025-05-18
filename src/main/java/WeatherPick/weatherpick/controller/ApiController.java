@@ -5,18 +5,29 @@ import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
 import WeatherPick.weatherpick.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.remote.JMXAuthenticator;
 import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api")
 public class ApiController {
     private final UserService userService;
     private final UserRepository userRepository;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     public ApiController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
@@ -25,9 +36,20 @@ public class ApiController {
 
     // 로그인 처리
     @PostMapping("/login")
-    public ResponseEntity<String> loginProcess(@RequestBody UserLoginDto dto) {
+    public ResponseEntity<String> loginProcess(@RequestBody UserLoginDto dto, HttpServletRequest request) {
         try {
-            userService.checkPassword(dto.getUsername(), dto.getPassword());
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword());
+
+
+            Authentication authentication = authenticationManager.authenticate(authToken);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            HttpSession session = request.getSession(true);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    SecurityContextHolder.getContext());
+
             return ResponseEntity.ok("로그인 성공");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: " + e.getMessage());

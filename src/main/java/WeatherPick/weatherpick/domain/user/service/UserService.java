@@ -5,6 +5,8 @@ import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +54,7 @@ public class UserService implements UserDetailsService {
         // 나머지 다 불가
         return false;
     }
+
 
     public boolean checkPassword(String username, String rawPassword) {
         // 사용자의 유저 정보 조회
@@ -163,7 +167,7 @@ public class UserService implements UserDetailsService {
     // 유저 로그인 (스프링 시큐리티 형식)
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity entity = userRepository.findByUsername(username).orElseThrow();
+        UserEntity entity = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
         return User.builder()
                 .username(entity.getUsername())
                 .password(entity.getPassword())
