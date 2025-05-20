@@ -13,13 +13,13 @@ public class PlaceRegistgerService {
         this.placeRepository = placeRepository;
     }
 
-    public void registerPlace(PlaceRegisterDto placeRegisterDto) {
-        PlaceEntity place = new PlaceEntity();
-
-        place.setplacename(placeRegisterDto.getPlaceName());
-        place.setplacelatitude(placeRegisterDto.getLatitude());
-        place.setplacelongitude(placeRegisterDto.getLongitude());
-        place.setScrap_Count(0);
-        placeRepository.save(place);
-    }
+//    public void registerPlace(PlaceRegisterDto placeRegisterDto) {
+//        PlaceEntity place = new PlaceEntity();
+//
+//        place.setplacename(placeRegisterDto.getPlaceName());
+//        place.setplacelatitude(placeRegisterDto.getLatitude());
+//        place.setplacelongitude(placeRegisterDto.getLongitude());
+//        place.setscrapCount(0);
+//        placeRepository.save(place);
+//    }
 }
