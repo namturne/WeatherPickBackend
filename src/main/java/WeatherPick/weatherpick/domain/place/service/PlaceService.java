@@ -1,5 +1,6 @@
 package WeatherPick.weatherpick.domain.place.service;
 
+import WeatherPick.weatherpick.domain.place.dto.PlaceDetailDto;
 import WeatherPick.weatherpick.domain.place.dto.PlaceRegisterDto;
 import WeatherPick.weatherpick.domain.place.entity.PlaceEntity;
 import WeatherPick.weatherpick.domain.place.repository.PlaceRepository;
@@ -40,7 +41,7 @@ public class PlaceService {
         }
     }
 
-    // 📄 전체 조회
+    //  전체 조회
     public List<PlaceRegisterDto> getAllplaces() {
         return placeRepository.findAll().stream()
                 .map(p -> new PlaceRegisterDto(
@@ -54,8 +55,19 @@ public class PlaceService {
     }
 
     // 상세 조회
-    public PlaceEntity findPlaceById(Long id) {
-        return placeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 장소입니다: id = " + id));
+    public PlaceDetailDto getPlaceDetail(Long placeId) {
+        PlaceEntity place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 장소가 존재하지 않습니다: id = " + placeId));
+
+        return new PlaceDetailDto(
+                place.getPlace_key(),
+                place.getPlacename(),
+                place.getAddress(),
+                place.getPlacelatitude(),
+                place.getPlacelongitude(),
+                place.getCategory(),
+                place.getAvgRating(),
+                place.getScrapCount()
+        );
     }
 }

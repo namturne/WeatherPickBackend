@@ -1,5 +1,6 @@
 package WeatherPick.weatherpick.controller;
 
+import WeatherPick.weatherpick.domain.place.dto.PlaceDetailDto;
 import WeatherPick.weatherpick.domain.place.dto.PlaceRegisterDto;
 import WeatherPick.weatherpick.domain.place.service.PlaceService;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,12 @@ public class PlaceController {
     @GetMapping("/all")
     public ResponseEntity<List<PlaceRegisterDto>> getAllPlaces() {
         return ResponseEntity.ok(placeService.getAllplaces());
+    }
+
+    //장소 상세 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<PlaceDetailDto> getPlaceById(@PathVariable Long id) {
+        PlaceDetailDto place = placeService.getPlaceDetail(id);
+        return ResponseEntity.ok(place);
     }
 }
