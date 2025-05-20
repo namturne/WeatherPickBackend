@@ -1,5 +1,6 @@
 package WeatherPick.weatherpick.domain.user.service;
 
+import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
@@ -71,7 +72,7 @@ public class UserService implements UserDetailsService {
 
     //유저 한 명 생성
     @Transactional
-    public void createOneUser(UserRequestDto dto){
+    public void createOneUser(SignRequestDto dto){
         String username = dto.getUsername();
         String password = dto.getPassword();
         String nickname = dto.getNickname();

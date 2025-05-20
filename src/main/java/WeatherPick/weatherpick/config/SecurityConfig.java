@@ -69,7 +69,7 @@ public class SecurityConfig {
         // 접근 경로별 인가  설정 뭔가 단조롭지않음 기분탓인가
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/","api/**","/user/check-username", "/user/check-email").permitAll() // login, /user/join 경로는 모든 사용자에게 허용
+                        .requestMatchers("/user/join","login","/","api/**","/user/check-username", "/user/check-email").permitAll() // login, /user/join 경로는 모든 사용자에게 허용
                         .requestMatchers("/user/update/**").hasRole("USER") // /user/update/** 경로는 "USER" 역할을 가진 사용자만 허용.
                         .anyRequest().authenticated()
 

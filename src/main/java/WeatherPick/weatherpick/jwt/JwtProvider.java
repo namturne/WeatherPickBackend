@@ -14,11 +14,11 @@ import java.util.Date;
 public class JwtProvider {
     private String secretKey = "Skrr5Skrr";
 
-    public String create(String email){
+    public String create(String username){
         Date expiredDate = Date.from(Instant.now().plus(1, ChronoUnit.HOURS));
         String jwt = Jwts.builder()
-                .signWith(SignatureAlgorithm.ES256, secretKey)
-                .setSubject(email).setIssuedAt(new Date()).setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .setSubject(username).setIssuedAt(new Date()).setExpiration(expiredDate)
                 .compact();
         return jwt;
     }

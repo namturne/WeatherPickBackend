@@ -1,6 +1,7 @@
 package WeatherPick.weatherpick.controller;
 
 
+import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserLoginDto;
 import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
@@ -60,7 +61,7 @@ public class UserController {
     }
 
     @PostMapping("/user/join")
-    public String joinProcess(UserRequestDto dto){
+    public String joinProcess(SignRequestDto dto){
         userService.createOneUser(dto);
 
         return "redirect:/login";
