@@ -55,44 +55,4 @@ public class PlaceEntity {
         this.avgRating = avgRating;
         this.scrapCount = scrapCount;
     }
-
-    public Long getplacekey() {
-        return place_key;
-    }
-
-    public void setplacekey(Long placekey) {
-        this.place_key = placekey;
-    }
-
-    public String getplacename() {
-        return placename;
-    }
-
-    public void setplacename(String placename) {
-        this.placename = placename;
-    }
-
-    public Double getplacelongitude() {
-        return placelongitude;
-    }
-
-    public void setplacelongitude(Double placelongitude) {
-        this.placelongitude = placelongitude;
-    }
-
-    public int getscrapCount() {
-        return scrapCount;
-    }
-
-    public void setscrapCount(int scrapCount) {
-        this.scrapCount = scrapCount;
-    }
-
-    public Double getplacelatitude() {
-        return placelatitude;
-    }
-
-    public void setplacelatitude(Double placelatitude) {
-        this.placelatitude = placelatitude;
-    }
 }

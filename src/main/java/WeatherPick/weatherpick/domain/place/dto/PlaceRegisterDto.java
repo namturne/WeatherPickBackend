@@ -6,9 +6,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PlaceRegisterDto {
-    private String placeName;
+    private String name;
+    private String address;
     private Double latitude;
     private Double longitude;
-    private int scrap_cnt = 0;
+    private String category;
 
+    public PlaceRegisterDto(String placename, String address, Double placelatitude, Double placelongitude, String category) {
+    }
 }
