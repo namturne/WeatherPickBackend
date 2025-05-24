@@ -1,36 +1,39 @@
 package WeatherPick.weatherpick.domain.review.service;
 
+import WeatherPick.weatherpick.common.ResponseDto;
 import WeatherPick.weatherpick.domain.review.dto.ReviewPostDto;
 import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
+import WeatherPick.weatherpick.domain.review.entity.TestplaceEntity;
 import WeatherPick.weatherpick.domain.review.repository.ReviewPostRepository;
 import WeatherPick.weatherpick.domain.review.repository.ReviewRatingRepository;
+import WeatherPick.weatherpick.domain.review.repository.TestPlaceRepository;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewPostService {
     private final ReviewPostRepository postRepo;
     private final ReviewRatingRepository ratingRepo;
     private final UserRepository userRepo;
+    private final TestPlaceRepository plRepo;
 
-    public ReviewPostService(ReviewPostRepository postRepo,
-                             ReviewRatingRepository ratingRepo,
-                             UserRepository userRepo) {
-        this.postRepo = postRepo;
-        this.ratingRepo = ratingRepo;
-        this.userRepo = userRepo;
-    }
+
 
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
                 e.getId(), e.getTitle(), e.getContent(),
-                e.getRating(), e.getScrapCount(), e.getCreatedDate()
+                e.getRating(), e.getScrapCount(), e.getCreatedDate() ,null
         );
     }
 
@@ -52,14 +55,35 @@ public class ReviewPostService {
 
     // 새 게시글 생성
     @Transactional
-    public ReviewPostDto createPost(ReviewPostDto dto, UserEntity user) {
-        ReviewPostEntity e = new ReviewPostEntity();
-        e.setTitle(dto.getTitle());
-        e.setContent(dto.getContent());
-        e.setRating(dto.getRating());
-        e.setUser(user);
-        ReviewPostEntity saved = postRepo.save(e);
-        return toDto(saved);
+    public ResponseEntity<? super ReviewPostDto> createPost(ReviewPostDto dto, String username) {
+        try{
+            boolean existedUsername = userRepo.existsByUsername(username);
+
+            if(!existedUsername) return ReviewPostDto.notExistUser();
+            ReviewPostEntity e = new ReviewPostEntity();
+            e.setTitle(dto.getTitle());
+            e.setContent(dto.getContent());
+            e.setUser(userRepo.findByUsername(username).get());
+            ReviewPostEntity saved = postRepo.save(e);
+
+            Long ReviewNumber = e.getId();
+            List<String> ReviewPlaceList = dto.getPlaceList();
+            List<TestplaceEntity> testplaceEntities = new ArrayList<>();
+
+            for (String place: ReviewPlaceList){
+                TestplaceEntity testplaceEntity = new TestplaceEntity(ReviewNumber,place);
+                testplaceEntities.add(testplaceEntity);
+            }
+
+            plRepo.saveAll(testplaceEntities);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+
+
+        return ReviewPostDto.success();
     }
 
     // 게시글 수정
@@ -72,7 +96,7 @@ public class ReviewPostService {
         }
         e.setTitle(dto.getTitle());
         e.setContent(dto.getContent());
-        e.setRating(dto.getRating());
+        //e.setRating(dto.getRating());
         return toDto(postRepo.save(e));
     }
 

@@ -34,13 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request,response);
                 return;
             }
-            String email = jwtProvider.validate(token);
-            if(email == null){
+            String username = jwtProvider.validate(token);
+            if(username == null){
                 filterChain.doFilter(request,response);
                 return;
             }
 
-            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email,null, AuthorityUtils.NO_AUTHORITIES);
+            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,null, AuthorityUtils.NO_AUTHORITIES);
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();

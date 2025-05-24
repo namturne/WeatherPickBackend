@@ -1,11 +1,15 @@
 package WeatherPick.weatherpick.domain.user.service;
 
+import WeatherPick.weatherpick.common.ResponseDto;
 import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
+import WeatherPick.weatherpick.domain.user.dto.UserInfoResponseDto;
 import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,15 +28,11 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    UserService(UserRepository userRepository,BCryptPasswordEncoder bCryptPasswordEncoder){
-        this.userRepository = userRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }
 
     // 유저 접근 권한 체크
     public Boolean isAccess(String username) {
@@ -119,6 +119,20 @@ public class UserService implements UserDetailsService {
         dto.setCreatedate(entity.getCreatedate());
         return dto;
     }
+
+    public ResponseEntity<? super UserInfoResponseDto> getInfoUser(String username){
+        Optional<UserEntity> userEntity = Optional.empty();
+        try {
+            userEntity = userRepository.findByUsername(username);
+            if(userEntity.isEmpty()) return UserInfoResponseDto.notExistUser();
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return UserInfoResponseDto.success(userEntity.get());
+    }
+
 
     // 유저 모두 읽기
     @Transactional(readOnly = true)
