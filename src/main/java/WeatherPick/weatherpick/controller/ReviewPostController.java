@@ -1,6 +1,8 @@
 package WeatherPick.weatherpick.controller;
 
+import WeatherPick.weatherpick.domain.review.dto.GetReviewResponseDto;
 import WeatherPick.weatherpick.domain.review.dto.ReviewPostDto;
+import WeatherPick.weatherpick.domain.review.dto.ReviewPostRequestDto;
 import WeatherPick.weatherpick.domain.review.service.ReviewPostService;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import jakarta.validation.Valid;
@@ -29,11 +31,18 @@ public class ReviewPostController {
 
     @PostMapping("")
     public ResponseEntity<? super ReviewPostDto> createPost(
-            @RequestBody @Valid ReviewPostDto dto,
+            @RequestBody @Valid ReviewPostRequestDto dto,
             @AuthenticationPrincipal String username) {
         //ReviewPostDto saved = service.createPost(dto, username);
         //return ResponseEntity.created(URI.create("/api/posts/" + saved.getId())).body(saved);
         return service.createPost(dto,username);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<? super GetReviewResponseDto> getPost(
+            @PathVariable("postId") Long ReviewId
+    ){
+        return service.getReview(ReviewId);
     }
 
     @PutMapping("/{postId}")

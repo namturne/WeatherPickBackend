@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 
 // 리뷰 게시글 엔티티
@@ -26,7 +28,7 @@ public class ReviewPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reviewpost_id")
-    private Long id;
+    private Long reviewId;
 
     @Column(nullable = false)
     private String title;
@@ -40,17 +42,27 @@ public class ReviewPostEntity {
 
     //@ManyToOne
     //@JoinColumn(name = "place_key", nullable = false) 임시수정
-    @Column
-    private String place;
+    //@Column
+    //private String place;
 
     @Column(nullable = false)
-    private int rating;
+    private int likeCount=0;
 
     @Column(nullable = false)
     private int scrapCount = 0;
+    @Column
+    private int viewCount =0;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate = new Date();
+
+    Date now =Date.from(Instant.now());
+    String simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd").format(now);
+
+    @Column
+    private String createdDate = simpleDateFormat;
+
+    public void increaseViewCount(){
+        this.viewCount++;
+    }
 
 
 }

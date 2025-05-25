@@ -38,7 +38,7 @@ public class ReviewCommentService {
     // 댓글 조회
     @Transactional(readOnly = true)
     public List<ReviewCommentDto> getCommentsByPostId(Long postId) {
-        return commentRepo.findByPost_Id(postId)
+        return commentRepo.findByPost_ReviewId(postId)
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 

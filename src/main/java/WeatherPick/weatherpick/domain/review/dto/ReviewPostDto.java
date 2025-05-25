@@ -26,7 +26,7 @@ public class ReviewPostDto extends ResponseDto {
 
     public ReviewPostDto() {super(ResponseCode.SUCCESS, ResponseMassage.SUCCESS);}
 
-    public ReviewPostDto(Long id, String title, String content, int rating, int scrapCount, Date createdDate,List<String> placeList) {
+    public ReviewPostDto(String title, String content,List<String> placeList) {
         super(ResponseCode.SUCCESS, ResponseMassage.SUCCESS);
         //this.id = id;
         this.title = title;

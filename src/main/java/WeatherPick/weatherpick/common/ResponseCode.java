@@ -9,7 +9,7 @@ public interface ResponseCode {
     String DUPLICATE_EMAIL = "DE";
     String DUPLICATE_ID = "DI";
     String NOT_EXIDSTED_USER= "NU";
-    String NOT_EXIDSTED_BOARD = "NB";
+    String NOT_EXIDSTED_REVIEW = "NR";
 
     //HTTP Status 401
     String SIGN_IN_FAIL= "SF";

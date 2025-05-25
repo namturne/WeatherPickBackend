@@ -10,7 +10,7 @@ public interface ResponseMassage {
     String DUPLICATE_EMAIL = "Duplicate email.";
     String DUPLICATE_ID = "Duplicate id.";
     String NOT_EXIDSTED_USER= "This user does not exist.";
-    String NOT_EXIDSTED_BOARD = "This board does not exist.";
+    String NOT_EXIDSTED_REVIEW  = "This review does not exist.";
 
     //HTTP Status 401
     String SIGN_IN_FAIL= "Login information mismatch.";

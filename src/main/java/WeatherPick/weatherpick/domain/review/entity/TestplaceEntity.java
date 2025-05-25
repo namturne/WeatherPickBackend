@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 public class TestplaceEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sequence;
-    private Long reviewNumber;
+    private Long reviewId;
     private String place;
 
-    public TestplaceEntity(Long reviewNumber, String place){
-        this.reviewNumber = reviewNumber;
+    public TestplaceEntity(Long reviewId, String place){
+        this.reviewId = reviewId;
         this.place = place;
     }
 }

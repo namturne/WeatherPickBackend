@@ -1,14 +1,18 @@
 package WeatherPick.weatherpick.domain.review.service;
 
 import WeatherPick.weatherpick.common.ResponseDto;
+import WeatherPick.weatherpick.domain.review.dto.GetReviewResponseDto;
 import WeatherPick.weatherpick.domain.review.dto.ReviewPostDto;
+import WeatherPick.weatherpick.domain.review.dto.ReviewPostRequestDto;
 import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
 import WeatherPick.weatherpick.domain.review.entity.TestplaceEntity;
+import WeatherPick.weatherpick.domain.review.repository.GetReviewPostResultSet;
 import WeatherPick.weatherpick.domain.review.repository.ReviewPostRepository;
 import WeatherPick.weatherpick.domain.review.repository.ReviewRatingRepository;
 import WeatherPick.weatherpick.domain.review.repository.TestPlaceRepository;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,13 +32,31 @@ public class ReviewPostService {
     private final TestPlaceRepository plRepo;
 
 
-
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
-                e.getId(), e.getTitle(), e.getContent(),
-                e.getRating(), e.getScrapCount(), e.getCreatedDate() ,null
+                e.getTitle(), e.getContent(),null
         );
     }
+
+    //선택한 게시글 조회
+    public ResponseEntity<? super GetReviewResponseDto> getReview(Long ReviewId){
+            GetReviewPostResultSet resultSet = null;
+            List<TestplaceEntity> testplaceEntities = new ArrayList<>();
+        try{
+            resultSet = postRepo.getReview(ReviewId);
+            if(resultSet == null) return  GetReviewResponseDto.notExistReview();
+            testplaceEntities = plRepo.findByReviewId(ReviewId);
+
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
+            reviewPostEntity.increaseViewCount();
+            postRepo.save(reviewPostEntity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return GetReviewResponseDto.success(resultSet,testplaceEntities);
+    }
+
 
     // 내 게시글 조회
     @Transactional(readOnly = true)
@@ -55,23 +76,24 @@ public class ReviewPostService {
 
     // 새 게시글 생성
     @Transactional
-    public ResponseEntity<? super ReviewPostDto> createPost(ReviewPostDto dto, String username) {
+    public ResponseEntity<? super ReviewPostDto> createPost(ReviewPostRequestDto dto, String username) {
         try{
             boolean existedUsername = userRepo.existsByUsername(username);
 
             if(!existedUsername) return ReviewPostDto.notExistUser();
+
             ReviewPostEntity e = new ReviewPostEntity();
             e.setTitle(dto.getTitle());
             e.setContent(dto.getContent());
             e.setUser(userRepo.findByUsername(username).get());
             ReviewPostEntity saved = postRepo.save(e);
 
-            Long ReviewNumber = e.getId();
+            Long ReviewId = e.getReviewId();
             List<String> ReviewPlaceList = dto.getPlaceList();
             List<TestplaceEntity> testplaceEntities = new ArrayList<>();
 
             for (String place: ReviewPlaceList){
-                TestplaceEntity testplaceEntity = new TestplaceEntity(ReviewNumber,place);
+                TestplaceEntity testplaceEntity = new TestplaceEntity(ReviewId,place);
                 testplaceEntities.add(testplaceEntity);
             }
 
