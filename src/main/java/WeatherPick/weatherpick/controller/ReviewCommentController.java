@@ -32,6 +32,13 @@ public class ReviewCommentController {
         return ResponseEntity.ok(service.getCommentsByPostId(postId));
     }
 
+    // ▶ 내가 쓴 댓글 조회
+    @GetMapping("/me")
+    public ResponseEntity<List<ReviewCommentDto>> getMyComments(
+            @AuthenticationPrincipal UserEntity user) {
+        return ResponseEntity.ok(service.getCommentsByUser(user));
+    }
+
     @PostMapping("/{postId}")
     public ResponseEntity<ReviewCommentDto> addComment(
             @PathVariable Long postId,

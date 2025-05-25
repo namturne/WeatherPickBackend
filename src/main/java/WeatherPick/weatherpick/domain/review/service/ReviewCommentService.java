@@ -42,6 +42,15 @@ public class ReviewCommentService {
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
+    // ▶ 내가 쓴 댓글 조회
+    @Transactional(readOnly = true)
+    public List<ReviewCommentDto> getCommentsByUser(UserEntity user) {
+        return commentRepo.findByUser_UserKey(user.getUserKey())
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
     // 댓글 등록
     @Transactional
     public ReviewCommentDto addComment(Long postId, ReviewCommentDto dto, UserEntity user) {

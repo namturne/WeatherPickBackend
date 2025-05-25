@@ -127,7 +127,7 @@ public class SecurityConfig {
      */
 }
 
-class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint{
+class  FailedAuthenticationEntryPoint implements AuthenticationEntryPoint{
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {

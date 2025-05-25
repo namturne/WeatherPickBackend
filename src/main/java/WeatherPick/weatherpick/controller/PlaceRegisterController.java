@@ -22,7 +22,7 @@ public class PlaceRegisterController {
 
     @PostMapping
     @ResponseBody
-    public ResponseEntity<String> createPlace(PlaceRegisterDto placeDTO) {
+    public ResponseEntity<String> createPlace(@RequestBody PlaceRegisterDto placeDTO) {
         placeRegistgerService.registerPlace(placeDTO);
         return ResponseEntity.ok("장소 등록 성공");
     }
