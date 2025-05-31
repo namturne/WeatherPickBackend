@@ -4,14 +4,13 @@ import WeatherPick.weatherpick.domain.review.dto.GetReviewResponseDto;
 import WeatherPick.weatherpick.domain.review.dto.ReviewPostDto;
 import WeatherPick.weatherpick.domain.review.dto.ReviewPostRequestDto;
 import WeatherPick.weatherpick.domain.review.service.ReviewPostService;
-import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -19,45 +18,53 @@ import java.net.URI;
 public class ReviewPostController {
     private final ReviewPostService service;
 
+    // 1) 나의 게시글 목록 조회
     @GetMapping("/mine")
-    public ResponseEntity<?> getMyPosts(@AuthenticationPrincipal UserEntity user) {
-        return ResponseEntity.ok(service.getMyPosts(user.getUsername()));
+    public ResponseEntity<List<ReviewPostDto>> getMyPosts(
+            @AuthenticationPrincipal String username) {
+        List<ReviewPostDto> list = service.getMyPosts(username);
+        return ResponseEntity.ok(list);
     }
 
+    // 2) 내가 스크랩한 게시글 목록 조회
     @GetMapping("/scraps")
-    public ResponseEntity<?> getMyScraps(@AuthenticationPrincipal UserEntity user) {
-        return ResponseEntity.ok(service.getMyScraps(user.getUsername()));
+    public ResponseEntity<List<ReviewPostDto>> getMyScraps(
+            @AuthenticationPrincipal String username) {
+        List<ReviewPostDto> list = service.getMyScraps(username);
+        return ResponseEntity.ok(list);
     }
 
+    // 3) 새 게시글 생성
     @PostMapping("")
     public ResponseEntity<? super ReviewPostDto> createPost(
             @RequestBody @Valid ReviewPostRequestDto dto,
             @AuthenticationPrincipal String username) {
-        //ReviewPostDto saved = service.createPost(dto, username);
-        //return ResponseEntity.created(URI.create("/api/posts/" + saved.getId())).body(saved);
-        return service.createPost(dto,username);
+        return service.createPost(dto, username);
     }
 
+    // 4) 특정 게시글 상세 조회
     @GetMapping("/{postId}")
     public ResponseEntity<? super GetReviewResponseDto> getPost(
-            @PathVariable("postId") Long ReviewId
-    ){
-        return service.getReview(ReviewId);
+            @PathVariable("postId") Long reviewId) {
+        return service.getReview(reviewId);
     }
 
+    // 5) 게시글 수정
     @PutMapping("/{postId}")
     public ResponseEntity<ReviewPostDto> updatePost(
             @PathVariable Long postId,
             @RequestBody ReviewPostDto dto,
-            @AuthenticationPrincipal UserEntity user) {
-        return ResponseEntity.ok(service.updatePost(postId, dto, user));
+            @AuthenticationPrincipal String username) {
+        ReviewPostDto updated = service.updatePost(postId, dto, username);
+        return ResponseEntity.ok(updated);
     }
 
+    // 6) 게시글 삭제
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
-            @AuthenticationPrincipal UserEntity user) {
-        service.deletePost(postId, user);
+            @AuthenticationPrincipal String username) {
+        service.deletePost(postId, username);
         return ResponseEntity.noContent().build();
     }
 }

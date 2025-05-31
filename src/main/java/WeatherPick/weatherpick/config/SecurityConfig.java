@@ -1,15 +1,9 @@
 package WeatherPick.weatherpick.config;
 
-
-import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.jwt.JwtAuthenticationFilter;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,17 +13,18 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.AuthenticationException;
 
 import java.io.IOException;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -38,103 +33,72 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // 스프링 시큐리티 암호화 클래스
+    // 1) BCryptPasswordEncoder 빈 등록
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
-    // 시큐리티 role 수직 계층 적용
+    // 2) Role 계층 정의 (ADMIN → USER)
     @Bean
-    public RoleHierarchy roleHierarchy(){
+    public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.withRolePrefix("ROLE_")
                 .role(UserRoleType.ADMIN.toString()).implies(UserRoleType.USER.toString())
-
                 .build();
     }
-    // 시큐리티 설정
+
+    // 3) SecurityFilterChain 정의 걍 gpt돌려버림
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        // csrf 보안 해제
         http
+                // CORS는 기본 설정 사용
                 .cors(Customizer.withDefaults())
+                // CSRF 비활성화 (REST API 용)
                 .csrf(AbstractHttpConfigurer::disable)
+                // HTTP Basic 인증 비활성화 (JWT 사용 예정)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(new FailedAuthenticationEntryPoint()))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // 접근 경로별 인가  설정 뭔가 단조롭지않음 기분탓인가
-        http
+                // 세션을 사용하지 않도록 설정 (Stateless)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 인증 실패 시 커스텀 엔트리포인트 사용
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new FailedAuthenticationEntryPoint()))
+                // JWT 토큰 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // 인가(Authorization) 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/join","login","/","api/**","/user/check-username", "/user/check-email").permitAll() // login, /user/join 경로는 모든 사용자에게 허용
-                        .requestMatchers("/user/update/**").hasRole("USER") // /user/update/** 경로는 "USER" 역할을 가진 사용자만 허용.
-                        .anyRequest().authenticated()
-
+                        // 로그인, 회원가입, 중복체크 등은 모두 허용
+                        .requestMatchers("/api/user/login", "/api/user/join", "/api/user/check-username", "/api/user/check-email").permitAll()
+                        // 날씨 조회 API는 공개
+                        .requestMatchers("/weather/**").permitAll()
+                        // 장소 등록 페이지와 API는 로그인된 사용자만 허용
+                        .requestMatchers("/place", "/place/**").authenticated()
+                        // 나머지 /api/**(유저 조회·게시글·댓글 등) 전부 인증 필요
+                        .requestMatchers("/api/**").authenticated()
+                        // 그 외 모든 경로(HTML 뷰 등)는 모두 허용
+                        .anyRequest().permitAll()
                 );
-
-
-        // 로그인 방식 설정 Form 로그인 방식
-        /*
-        http
-
-                .formLogin(login -> login
-                        .loginPage("/api/login") // 커스텀 로그인 페이지 지정
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"message\": \"로그인 성공\"}");
-                        })
-                        .failureHandler((request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"message\": \"로그인 실패\"}");
-                        })
-                        //.defaultSuccessUrl("/main", true) // 로그인 성공 시 이동할 페이지
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/logout") // 로그아웃 엔드포인트 설정
-                        //.logoutSuccessUrl("/login")  // 로그아웃 후 이동할 페이지
-                        .invalidateHttpSession(true) // 세션 삭제
-                        .deleteCookies("JSESSIONID") // 쿠키 삭제
-                        .permitAll()
-                );
-    */
 
         return http.build();
     }
 
+    // 4) AuthenticationManager 빈 등록
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-    /*
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
-     */
 }
 
-class  FailedAuthenticationEntryPoint implements AuthenticationEntryPoint{
-
+/**
+ * 인증 실패 시(토큰이 없거나 유효하지 않을 때) JSON 형태로 응답을 내려주는 엔트리포인트
+ */
+class FailedAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-
+    public void commence(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException authException  // 반드시 org.springframework.security.core.AuthenticationException 사용
+    ) throws IOException, ServletException {
         response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("{\"code\": \"NP\", \"message\": \"Authorization Failed.\" }");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write("{\"code\":\"NP\",\"message\":\"Authorization Failed.\"}");
     }
-
 }

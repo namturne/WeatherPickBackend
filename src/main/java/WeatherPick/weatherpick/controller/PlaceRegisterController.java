@@ -9,17 +9,20 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/place")
 public class PlaceRegisterController {
+
     private final PlaceRegistgerService placeRegistgerService;
 
     public PlaceRegisterController(PlaceRegistgerService placeRegistgerService) {
         this.placeRegistgerService = placeRegistgerService;
     }
 
+    // 장소 등록 화면
     @GetMapping
     public String showPlaceForm() {
         return "place";
     }
 
+    // 장소 등록 API (JSON Body를 받을 때 @RequestBody 필요)
     @PostMapping
     @ResponseBody
     public ResponseEntity<String> createPlace(@RequestBody PlaceRegisterDto placeDTO) {

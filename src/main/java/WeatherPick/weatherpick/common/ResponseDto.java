@@ -10,14 +10,15 @@ import org.springframework.http.ResponseEntity;
 @AllArgsConstructor
 public class ResponseDto {
     private String code;
-    private String massage;
+    private String message; //message로 고침
 
     public ResponseDto() {
 
     }
 
     public static ResponseEntity<ResponseDto> databaseError(){
-        ResponseDto responseBody = new ResponseDto(ResponseCode.DATABASE_ERROR,ResponseMassage.DATABASE_ERROR);
+        ResponseDto responseBody = new ResponseDto(ResponseCode.DATABASE_ERROR,ResponseMessage.DATABASE_ERROR);
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBody);
     }
 }

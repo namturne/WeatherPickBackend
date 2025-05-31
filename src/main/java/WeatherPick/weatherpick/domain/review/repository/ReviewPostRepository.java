@@ -7,25 +7,24 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ReviewPostRepository extends JpaRepository<ReviewPostEntity, Long> {
+
     List<ReviewPostEntity> findAllByUser_UserKey(Long userKey);
 
     ReviewPostEntity findByReviewId(Long reviewId);
 
     @Query(
             value =
-            "select "+
-            "R.reviewpost_id AS reviewId, "+
-            "R.title AS title, "+
-            "R.content AS content, "+
-            "R.createdDate AS createDate, "+
-            "U.nickname AS writerNickname, "+
-            "U.username AS writerUsername "+
-            "from db1.ReviewPostEntity AS R "+
-            "inner join db1.UserEntity AS U "+
-            "on R.user_key = U.user_key "+
-            "WHERE reviewpost_id = ?1",
+                    "SELECT " +
+                            "R.reviewpost_id     AS reviewId, " +
+                            "R.title             AS title, " +
+                            "R.content           AS content, " +
+                            "R.created_date      AS createDate, " +
+                            "U.nickname          AS writerNickname, " +
+                            "U.username          AS writerUsername " +
+                            "FROM review_post_entity R " +
+                            "INNER JOIN user_entity U ON R.user_key = U.user_key " +
+                            "WHERE R.reviewpost_id = ?1",
             nativeQuery = true
     )
     GetReviewPostResultSet getReview(Long reviewId);
-
 }

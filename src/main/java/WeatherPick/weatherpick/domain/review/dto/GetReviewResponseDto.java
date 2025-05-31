@@ -2,7 +2,7 @@ package WeatherPick.weatherpick.domain.review.dto;
 
 import WeatherPick.weatherpick.common.ResponseCode;
 import WeatherPick.weatherpick.common.ResponseDto;
-import WeatherPick.weatherpick.common.ResponseMassage;
+import WeatherPick.weatherpick.common.ResponseMessage; //message
 import WeatherPick.weatherpick.domain.review.entity.TestplaceEntity;
 import WeatherPick.weatherpick.domain.review.repository.GetReviewPostResultSet;
 import lombok.Getter;
@@ -46,7 +46,7 @@ public class GetReviewResponseDto extends ResponseDto {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
     public static ResponseEntity<ResponseDto> notExistReview(){
-        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXIDSTED_REVIEW, ResponseMassage.NOT_EXIDSTED_REVIEW);
+        ResponseDto result = new ResponseDto(ResponseCode.NOT_EXIDSTED_REVIEW, ResponseMessage.NOT_EXIDSTED_REVIEW);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
     }
 
