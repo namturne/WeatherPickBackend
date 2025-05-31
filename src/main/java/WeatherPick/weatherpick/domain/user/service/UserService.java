@@ -1,10 +1,17 @@
 package WeatherPick.weatherpick.domain.user.service;
 
+import WeatherPick.weatherpick.common.ResponseDto;
+import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
+import WeatherPick.weatherpick.domain.user.dto.UserInfoResponseDto;
 import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
 import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,20 +22,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    UserService(UserRepository userRepository,BCryptPasswordEncoder bCryptPasswordEncoder){
-        this.userRepository = userRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }
 
     // 유저 접근 권한 체크
     public Boolean isAccess(String username) {
@@ -52,6 +56,7 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
+
     public boolean checkPassword(String username, String rawPassword) {
         // 사용자의 유저 정보 조회
         Optional<UserEntity> user = userRepository.findByUsername(username);
@@ -67,7 +72,7 @@ public class UserService implements UserDetailsService {
 
     //유저 한 명 생성
     @Transactional
-    public void createOneUser(UserRequestDto dto){
+    public void createOneUser(SignRequestDto dto){
         String username = dto.getUsername();
         String password = dto.getPassword();
         String nickname = dto.getNickname();
@@ -114,6 +119,20 @@ public class UserService implements UserDetailsService {
         dto.setCreatedate(entity.getCreatedate());
         return dto;
     }
+
+    public ResponseEntity<? super UserInfoResponseDto> getInfoUser(String username){
+        Optional<UserEntity> userEntity = Optional.empty();
+        try {
+            userEntity = userRepository.findByUsername(username);
+            if(userEntity.isEmpty()) return UserInfoResponseDto.notExistUser();
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return UserInfoResponseDto.success(userEntity.get());
+    }
+
 
     // 유저 모두 읽기
     @Transactional(readOnly = true)
@@ -163,7 +182,7 @@ public class UserService implements UserDetailsService {
     // 유저 로그인 (스프링 시큐리티 형식)
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity entity = userRepository.findByUsername(username).orElseThrow();
+        UserEntity entity = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
         return User.builder()
                 .username(entity.getUsername())
                 .password(entity.getPassword())

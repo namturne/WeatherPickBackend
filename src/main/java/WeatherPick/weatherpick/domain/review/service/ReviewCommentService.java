@@ -38,8 +38,17 @@ public class ReviewCommentService {
     // 댓글 조회
     @Transactional(readOnly = true)
     public List<ReviewCommentDto> getCommentsByPostId(Long postId) {
-        return commentRepo.findByPost_Id(postId)
+        return commentRepo.findByPost_ReviewId(postId)
                 .stream().map(this::toDto).collect(Collectors.toList());
+    }
+
+    // ▶ 내가 쓴 댓글 조회
+    @Transactional(readOnly = true)
+    public List<ReviewCommentDto> getCommentsByUser(UserEntity user) {
+        return commentRepo.findByUser_UserKey(user.getUserKey())
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     // 댓글 등록

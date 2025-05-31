@@ -1,45 +1,57 @@
 package WeatherPick.weatherpick.controller;
 
-import WeatherPick.weatherpick.domain.user.dto.UserLoginDto;
-import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
+import WeatherPick.weatherpick.domain.user.dto.*;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import WeatherPick.weatherpick.domain.user.service.AuthService;
 import WeatherPick.weatherpick.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.apache.catalina.Authenticator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.remote.JMXAuthenticator;
 import java.util.Collections;
 import java.util.Map;
 
+
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class ApiController {
     private final UserService userService;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public ApiController(UserService userService, UserRepository userRepository) {
-        this.userService = userService;
-        this.userRepository = userRepository;
-    }
 
     // 로그인 처리
     @PostMapping("/login")
-    public ResponseEntity<String> loginProcess(@RequestBody UserLoginDto dto) {
-        try {
-            userService.checkPassword(dto.getUsername(), dto.getPassword());
-            return ResponseEntity.ok("로그인 성공");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패: " + e.getMessage());
-        }
+    public ResponseEntity<? super LoginResponseDto> login(@RequestBody @Valid LoginRequestDto dto) {
+        return authService.Login(dto);
     }
 
     // 회원가입 처리
     @PostMapping("/join")
-    public ResponseEntity<String> joinProcess(@RequestBody UserRequestDto dto) {
-        userService.createOneUser(dto);
-        return ResponseEntity.ok("회원가입 완료");
+    public ResponseEntity<? super SignResponseDto> signUp(@RequestBody @Valid SignRequestDto dto) {
+        return authService.signUp(dto);
     }
+
+    @GetMapping("")
+    public ResponseEntity<? super UserInfoResponseDto> getInfoUser(@AuthenticationPrincipal String username){
+        return userService.getInfoUser(username);
+    }
+
+
 
     // 회원정보 조회
     @GetMapping("/{username}")

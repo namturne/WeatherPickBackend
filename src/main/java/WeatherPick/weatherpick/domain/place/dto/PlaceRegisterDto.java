@@ -1,5 +1,9 @@
 package WeatherPick.weatherpick.domain.place.dto;
 
+
+
+
+
 public class PlaceRegisterDto {
     private String placeName;
     private Double latitude;
