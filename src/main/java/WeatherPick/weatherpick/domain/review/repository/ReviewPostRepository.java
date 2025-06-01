@@ -8,18 +8,23 @@ import java.util.List;
 
 public interface ReviewPostRepository extends JpaRepository<ReviewPostEntity, Long> {
     List<ReviewPostEntity> findAllByUser_UserKey(Long userKey);
-
     ReviewPostEntity findByReviewId(Long reviewId);
 
+    @Query("SELECT r FROM ReviewPostEntity r JOIN FETCH r.user")
+    List<ReviewPostEntity> findByOrderByWriteDateDesc();
     @Query(
             value =
             "select "+
             "R.reviewpost_id AS reviewId, "+
             "R.title AS title, "+
             "R.content AS content, "+
-            "R.createdDate AS createDate, "+
+            "R.writeDate AS writeDate, "+
             "U.nickname AS writerNickname, "+
-            "U.username AS writerUsername "+
+            "U.username AS writerUsername, "+
+            "R.likeCount AS likeCount, "+
+            "R.scrapCount AS scrapCount, "+
+            "R.commentCount AS commentCount, "+
+            "R.ViewCount AS viewCount "+
             "from db1.ReviewPostEntity AS R "+
             "inner join db1.UserEntity AS U "+
             "on R.user_key = U.user_key "+
@@ -27,5 +32,7 @@ public interface ReviewPostRepository extends JpaRepository<ReviewPostEntity, Lo
             nativeQuery = true
     )
     GetReviewPostResultSet getReview(Long reviewId);
+
+
 
 }

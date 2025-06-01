@@ -3,7 +3,9 @@ package WeatherPick.weatherpick.domain.review.entity;
 import WeatherPick.weatherpick.domain.place.entity.PlaceEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.text.SimpleDateFormat;
@@ -24,6 +26,8 @@ createddate	    DATETIME	  작성 시간
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReviewPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +40,7 @@ public class ReviewPostEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_key", nullable = false)
     private UserEntity user;
 
@@ -45,24 +49,28 @@ public class ReviewPostEntity {
     //@Column
     //private String place;
 
-    @Column(nullable = false)
+    @Column
     private int likeCount=0;
 
-    @Column(nullable = false)
+    @Column
     private int scrapCount = 0;
     @Column
     private int viewCount =0;
 
-
-    Date now =Date.from(Instant.now());
-    String simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd").format(now);
+    @Column
+    private int commentCount =0;
 
     @Column
-    private String createdDate = simpleDateFormat;
+    String writeDate = new SimpleDateFormat("yyyy-MM-dd").format(Date.from(Instant.now()));
+
 
     public void increaseViewCount(){
         this.viewCount++;
     }
-
-
+    public void increaseFavoriteCount(){
+        this.likeCount++;
+    }
+    public void decreaseFavoriteCount(){
+        this.likeCount--;
+    }
 }

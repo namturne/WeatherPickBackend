@@ -1,15 +1,11 @@
 package WeatherPick.weatherpick.domain.review.service;
 
 import WeatherPick.weatherpick.common.ResponseDto;
-import WeatherPick.weatherpick.domain.review.dto.GetReviewResponseDto;
-import WeatherPick.weatherpick.domain.review.dto.ReviewPostDto;
-import WeatherPick.weatherpick.domain.review.dto.ReviewPostRequestDto;
+import WeatherPick.weatherpick.domain.review.dto.*;
+import WeatherPick.weatherpick.domain.review.entity.ReviewFavoriteEntity;
 import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
 import WeatherPick.weatherpick.domain.review.entity.TestplaceEntity;
-import WeatherPick.weatherpick.domain.review.repository.GetReviewPostResultSet;
-import WeatherPick.weatherpick.domain.review.repository.ReviewPostRepository;
-import WeatherPick.weatherpick.domain.review.repository.ReviewRatingRepository;
-import WeatherPick.weatherpick.domain.review.repository.TestPlaceRepository;
+import WeatherPick.weatherpick.domain.review.repository.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -30,7 +26,7 @@ public class ReviewPostService {
     private final ReviewRatingRepository ratingRepo;
     private final UserRepository userRepo;
     private final TestPlaceRepository plRepo;
-
+    private final FavoriteRepository faRepo;
 
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
@@ -72,6 +68,19 @@ public class ReviewPostService {
         UserEntity me = userRepo.findByUsername(username).orElseThrow();
         return ratingRepo.findByUser_UserKeyAndScrapedTrue(me.getUserKey())
                 .stream().map(r -> toDto(r.getPost())).collect(Collectors.toList());
+    }
+
+    // 최신 게시글 리스트 조회
+    public ResponseEntity<? super GetReviewListResponseDto> getReviewList(){
+        List<ReviewPostEntity> reviewPostEntities;
+        try {
+
+            reviewPostEntities = postRepo.findByOrderByWriteDateDesc();
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return GetReviewListResponseDto.success(reviewPostEntities);
     }
 
     // 새 게시글 생성
@@ -131,5 +140,31 @@ public class ReviewPostService {
             throw new AccessDeniedException("삭제 권한이 없습니다.");
         }
         postRepo.delete(e);
+    }
+    //좋아요
+    public  ResponseEntity<? super PutFavoriteResponseDto> putFavorite(Long ReviewId,String username){
+        try {
+            boolean existedUser = userRepo.existsByUsername(username);
+            if(!existedUser) return PutFavoriteResponseDto.noExistUser();
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
+            if(reviewPostEntity==null) return PutFavoriteResponseDto.noExistReview();
+
+
+            ReviewFavoriteEntity reviewFavoriteEntity = faRepo.findByReviewIdAndUsername(ReviewId,username);
+            if(reviewFavoriteEntity==null){
+                reviewFavoriteEntity = new ReviewFavoriteEntity(username,ReviewId);
+                faRepo.save(reviewFavoriteEntity);
+                reviewPostEntity.increaseFavoriteCount();
+            }
+            else {
+                faRepo.delete(reviewFavoriteEntity);
+                reviewPostEntity.decreaseFavoriteCount();
+            }
+            postRepo.save(reviewPostEntity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return PutFavoriteResponseDto.success();
     }
 }

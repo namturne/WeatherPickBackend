@@ -95,4 +95,6 @@ public class ApiController {
         boolean exists = userRepository.existsByEmail(email);
         return Collections.singletonMap("exists", exists);
     }
+
+    //
 }
