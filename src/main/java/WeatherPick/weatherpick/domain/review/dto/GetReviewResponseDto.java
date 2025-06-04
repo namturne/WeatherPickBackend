@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class GetReviewResponseDto extends ResponseDto {
@@ -23,6 +24,10 @@ public class GetReviewResponseDto extends ResponseDto {
     private String createDate;
     private String writerUsername;
     private String writerNickname;
+    private Integer likeCount;
+    private Integer scrapCount;
+    private Integer viewCount;
+    private Integer commentCount;
 
 
     private GetReviewResponseDto(GetReviewPostResultSet resultSet, List<TestplaceEntity> testplaceEntities){
@@ -37,9 +42,14 @@ public class GetReviewResponseDto extends ResponseDto {
         this.title = resultSet.getTitle();
         this.content = resultSet.getContent();
         this.placeList =placeList;
-        this.createDate = resultSet.getCreateDate();
+        this.createDate = resultSet.getWriteDate();
         this.writerNickname = resultSet.getWriterNickname();
         this.writerUsername = resultSet.getWriterUsername();
+        this.likeCount = Optional.ofNullable(resultSet.getLikeCount()).orElse(0);
+        this.scrapCount = Optional.ofNullable(resultSet.getScrapCount()).orElse(0);
+        this.viewCount= Optional.ofNullable(resultSet.getViewCount()).orElse(0);
+        this.commentCount= Optional.ofNullable(resultSet.getCommentCount()).orElse(0);
+
     }
     public static ResponseEntity<GetReviewResponseDto> success(GetReviewPostResultSet resultSet, List<TestplaceEntity> testplaceEntities){
         GetReviewResponseDto result = new GetReviewResponseDto(resultSet,testplaceEntities);

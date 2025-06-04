@@ -21,6 +21,7 @@ public interface ResponseMassage {
 
     //HTTP Status 500
     String DATABASE_ERROR = "Database error.";
+    String API_ERROR  = "Api error";
 
 
 }
