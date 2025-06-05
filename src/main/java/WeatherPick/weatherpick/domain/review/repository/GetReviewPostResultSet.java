@@ -12,4 +12,5 @@ public interface GetReviewPostResultSet {
     Integer getViewCount();
     Integer getCommentCount();
 
+    String getCreateDate();
 }
