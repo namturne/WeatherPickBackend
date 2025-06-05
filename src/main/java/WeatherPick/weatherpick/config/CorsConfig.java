@@ -1,18 +1,35 @@
 package WeatherPick.weatherpick.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
-    @Override
-    public void addCorsMappings (CorsRegistry corsRegistry){
-        corsRegistry
-                .addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedMethods("*")
-                .allowCredentials(true); // credentials 허용;
+public class CorsConfig {
 
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        
+        // 프론트엔드 도메인 허용
+        config.addAllowedOrigin("http://localhost:3000");
+        
+        // 모든 HTTP 메서드 허용
+        config.addAllowedMethod("*");
+        
+        // 모든 헤더 허용
+        config.addAllowedHeader("*");
+        
+        // Credentials 허용
+        config.setAllowCredentials(true);
+        
+        // preflight 요청 캐시 시간 설정
+        config.setMaxAge(3600L);
+        
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
     }
 }

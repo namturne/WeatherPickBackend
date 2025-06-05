@@ -1,6 +1,6 @@
 package WeatherPick.weatherpick.domain.review.entity;
 
-import WeatherPick.weatherpick.domain.place.entity.PlaceEntity;
+import WeatherPick.weatherpick.domain.place.entity.NaverPlaceEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,9 @@ import lombok.Setter;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 // 리뷰 게시글 엔티티
 /*
@@ -44,10 +46,8 @@ public class ReviewPostEntity {
     @JoinColumn(name = "user_key", nullable = false)
     private UserEntity user;
 
-    //@ManyToOne
-    //@JoinColumn(name = "place_key", nullable = false) 임시수정
-    //@Column
-    //private String place;
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NaverPlaceEntity> places = new ArrayList<>();
 
     @Column
     private int likeCount=0;
@@ -72,5 +72,21 @@ public class ReviewPostEntity {
     }
     public void decreaseFavoriteCount(){
         this.likeCount--;
+    }
+    public void increaseScrapCount(){
+        this.scrapCount++;
+    }
+    public void decreaseScrapCount(){
+        this.scrapCount--;
+    }
+
+    public void addPlace(NaverPlaceEntity place) {
+        places.add(place);
+        place.setReview(this);
+    }
+
+    public void removePlace(NaverPlaceEntity place) {
+        places.remove(place);
+        place.setReview(null);
     }
 }

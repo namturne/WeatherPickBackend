@@ -22,10 +22,7 @@ public class ReviewPostController {
         return ResponseEntity.ok(service.getMyPosts(user.getUsername()));
     }
 
-    @GetMapping("/scraps")
-    public ResponseEntity<?> getMyScraps(@AuthenticationPrincipal UserEntity user) {
-        return ResponseEntity.ok(service.getMyScraps(user.getUsername()));
-    }
+
 
     @PostMapping("")
     public ResponseEntity<? super ReviewPostDto> createPost(
@@ -49,6 +46,14 @@ public class ReviewPostController {
         return service.putFavorite(reviewId,username);
     }
 
+    @PutMapping("/{postId}/scrap")
+    public ResponseEntity<? super PutScrapResponseDto> putscrap(
+            @PathVariable("postId") Long reviewId,
+            @AuthenticationPrincipal String username
+    ){
+        return service.putScrap(reviewId,username);
+    }
+
 
     @GetMapping("/{postId}")
     public ResponseEntity<? super GetReviewResponseDto> getPost(
@@ -64,6 +69,8 @@ public class ReviewPostController {
             @AuthenticationPrincipal UserEntity user) {
         return ResponseEntity.ok(service.updatePost(postId, dto, user));
     }
+
+
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(

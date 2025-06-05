@@ -1,19 +1,21 @@
 package WeatherPick.weatherpick.domain.review.service;
 
 import WeatherPick.weatherpick.common.ResponseDto;
+import WeatherPick.weatherpick.domain.place.entity.NaverPlaceEntity;
+import WeatherPick.weatherpick.domain.place.repository.NaverPlaceRepository;
 import WeatherPick.weatherpick.domain.review.dto.*;
 import WeatherPick.weatherpick.domain.review.entity.ReviewFavoriteEntity;
 import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
-import WeatherPick.weatherpick.domain.review.entity.TestplaceEntity;
+import WeatherPick.weatherpick.domain.review.entity.ReviewScrapEntity;
 import WeatherPick.weatherpick.domain.review.repository.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +25,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewPostService {
     private final ReviewPostRepository postRepo;
-    private final ReviewRatingRepository ratingRepo;
     private final UserRepository userRepo;
-    private final TestPlaceRepository plRepo;
     private final FavoriteRepository faRepo;
+    private final NaverPlaceRepository naverPlaceRepo;
+    private final ScrapRepository scRepo;
 
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
@@ -37,11 +39,11 @@ public class ReviewPostService {
     //선택한 게시글 조회
     public ResponseEntity<? super GetReviewResponseDto> getReview(Long ReviewId){
             GetReviewPostResultSet resultSet = null;
-            List<TestplaceEntity> testplaceEntities = new ArrayList<>();
+            List<NaverPlaceEntity> naverPlaceEntities = new ArrayList<>();
         try{
             resultSet = postRepo.getReview(ReviewId);
             if(resultSet == null) return  GetReviewResponseDto.notExistReview();
-            testplaceEntities = plRepo.findByReviewId(ReviewId);
+            naverPlaceEntities = naverPlaceRepo.findByReview_ReviewId(ReviewId);
 
             ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
             reviewPostEntity.increaseViewCount();
@@ -50,7 +52,7 @@ public class ReviewPostService {
             e.printStackTrace();
             return ResponseDto.databaseError();
         }
-        return GetReviewResponseDto.success(resultSet,testplaceEntities);
+        return GetReviewResponseDto.success(resultSet,naverPlaceEntities);
     }
 
 
@@ -62,13 +64,7 @@ public class ReviewPostService {
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    // 내가 스크랩한 글 조회
-    @Transactional(readOnly = true)
-    public List<ReviewPostDto> getMyScraps(String username) {
-        UserEntity me = userRepo.findByUsername(username).orElseThrow();
-        return ratingRepo.findByUser_UserKeyAndScrapedTrue(me.getUserKey())
-                .stream().map(r -> toDto(r.getPost())).collect(Collectors.toList());
-    }
+
 
     // 최신 게시글 리스트 조회
     public ResponseEntity<? super GetReviewListResponseDto> getReviewList(){
@@ -86,35 +82,54 @@ public class ReviewPostService {
     // 새 게시글 생성
     @Transactional
     public ResponseEntity<? super ReviewPostDto> createPost(ReviewPostRequestDto dto, String username) {
-        try{
+        try {
             boolean existedUsername = userRepo.existsByUsername(username);
+            if (!existedUsername) return ReviewPostDto.notExistUser();
 
-            if(!existedUsername) return ReviewPostDto.notExistUser();
-
-            ReviewPostEntity e = new ReviewPostEntity();
-            e.setTitle(dto.getTitle());
-            e.setContent(dto.getContent());
-            e.setUser(userRepo.findByUsername(username).get());
-            ReviewPostEntity saved = postRepo.save(e);
-
-            Long ReviewId = e.getReviewId();
-            List<String> ReviewPlaceList = dto.getPlaceList();
-            List<TestplaceEntity> testplaceEntities = new ArrayList<>();
-
-            for (String place: ReviewPlaceList){
-                TestplaceEntity testplaceEntity = new TestplaceEntity(ReviewId,place);
-                testplaceEntities.add(testplaceEntity);
+            // 장소 유효성 검사
+            if (dto.getPlaces() != null) {
+                for (ReviewPostRequestDto.PlaceDto place : dto.getPlaces()) {
+                    if (!StringUtils.hasText(place.getTitle()) ||
+                        !StringUtils.hasText(place.getAddress()) ||
+                        !StringUtils.hasText(place.getRoadAddress()) ||
+                        !StringUtils.hasText(place.getMapx()) ||
+                        !StringUtils.hasText(place.getMapy())) {
+                        return ResponseDto.databaseError();
+                    }
+                }
             }
 
-            plRepo.saveAll(testplaceEntities);
+            ReviewPostEntity post = new ReviewPostEntity();
+            post.setTitle(dto.getTitle());
+            post.setContent(dto.getContent());
+            post.setUser(userRepo.findByUsername(username).get());
+            
+            // 게시글 저장
+            ReviewPostEntity savedPost = postRepo.save(post);
 
-        }catch (Exception e){
+            // 장소 정보 저장
+            if (dto.getPlaces() != null) {
+                List<NaverPlaceEntity> places = new ArrayList<>();
+                for (ReviewPostRequestDto.PlaceDto placeDto : dto.getPlaces()) {
+                    NaverPlaceEntity place = new NaverPlaceEntity();
+                    place.setTitle(placeDto.getTitle());
+                    place.setAddress(placeDto.getAddress());
+                    place.setRoadAddress(placeDto.getRoadAddress());
+                    place.setMapx(placeDto.getMapx());
+                    place.setMapy(placeDto.getMapy());
+                    place.setCategory(placeDto.getCategory());
+                    place.setLink(placeDto.getLink());
+                    place.setReview(savedPost);
+                    places.add(place);
+                }
+                naverPlaceRepo.saveAll(places);
+            }
+
+            return ReviewPostDto.success();
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseDto.databaseError();
         }
-
-
-        return ReviewPostDto.success();
     }
 
     // 게시글 수정
@@ -166,5 +181,31 @@ public class ReviewPostService {
             return ResponseDto.databaseError();
         }
         return PutFavoriteResponseDto.success();
+    }
+    //스크랩
+    public  ResponseEntity<? super PutScrapResponseDto> putScrap(Long ReviewId,String username){
+        try {
+            boolean existedUser = userRepo.existsByUsername(username);
+            if(!existedUser) return PutScrapResponseDto.noExistUser();
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
+            if(reviewPostEntity==null) return PutScrapResponseDto.noExistReview();
+
+
+            ReviewScrapEntity reviewScrapEntity = scRepo.findByReviewIdAndUsername(ReviewId,username);
+            if(reviewScrapEntity==null){
+                reviewScrapEntity = new ReviewScrapEntity(username,ReviewId);
+                scRepo.save(reviewScrapEntity);
+                reviewPostEntity.increaseScrapCount();
+            }
+            else {
+                scRepo.delete(reviewScrapEntity);
+                reviewPostEntity.decreaseScrapCount();
+            }
+            postRepo.save(reviewPostEntity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return PutScrapResponseDto.success();
     }
 }

@@ -1,10 +1,12 @@
 package WeatherPick.weatherpick.domain.place.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NaverPlaceDto {
     @JsonProperty("title")
     private String title;
@@ -14,6 +16,9 @@ public class NaverPlaceDto {
     
     @JsonProperty("category")
     private String category;
+    
+    @JsonProperty("description")
+    private String description;
     
     @JsonProperty("address")
     private String address;
