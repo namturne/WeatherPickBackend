@@ -4,6 +4,7 @@ import WeatherPick.weatherpick.common.ResponseDto;
 import WeatherPick.weatherpick.domain.place.entity.NaverPlaceEntity;
 import WeatherPick.weatherpick.domain.place.repository.NaverPlaceRepository;
 import WeatherPick.weatherpick.domain.review.dto.*;
+import WeatherPick.weatherpick.domain.review.entity.ReviewCommentEntity;
 import WeatherPick.weatherpick.domain.review.entity.ReviewFavoriteEntity;
 import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
 import WeatherPick.weatherpick.domain.review.entity.ReviewScrapEntity;
@@ -29,6 +30,7 @@ public class ReviewPostService {
     private final FavoriteRepository faRepo;
     private final NaverPlaceRepository naverPlaceRepo;
     private final ScrapRepository scRepo;
+    private final ReviewCommentRepository coRepo;
 
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
@@ -37,15 +39,15 @@ public class ReviewPostService {
     }
 
     //선택한 게시글 조회
-    public ResponseEntity<? super GetReviewResponseDto> getReview(Long ReviewId){
+    public ResponseEntity<? super GetReviewResponseDto> getReview(Long ReviewPostId){
             GetReviewPostResultSet resultSet = null;
             List<NaverPlaceEntity> naverPlaceEntities = new ArrayList<>();
         try{
-            resultSet = postRepo.getReview(ReviewId);
+            resultSet = postRepo.getReview(ReviewPostId);
             if(resultSet == null) return  GetReviewResponseDto.notExistReview();
-            naverPlaceEntities = naverPlaceRepo.findByReview_ReviewId(ReviewId);
+            naverPlaceEntities = naverPlaceRepo.findByReview_ReviewPostId(ReviewPostId);
 
-            ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewPostId(ReviewPostId);
             reviewPostEntity.increaseViewCount();
             postRepo.save(reviewPostEntity);
         }catch (Exception e){
@@ -60,7 +62,7 @@ public class ReviewPostService {
     @Transactional(readOnly = true)
     public List<ReviewPostDto> getMyPosts(String username) {
         UserEntity me = userRepo.findByUsername(username).orElseThrow();
-        return postRepo.findAllByUser_UserKey(me.getUserKey())
+        return postRepo.findAllByUser_UserId(me.getUserId())
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
@@ -137,7 +139,7 @@ public class ReviewPostService {
     public ReviewPostDto updatePost(Long postId, ReviewPostDto dto, UserEntity user) {
         ReviewPostEntity e = postRepo.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
-        if (!e.getUser().getUserKey().equals(user.getUserKey())) {
+        if (!e.getUser().getUserId().equals(user.getUserId())) {
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
         e.setTitle(dto.getTitle());
@@ -151,23 +153,23 @@ public class ReviewPostService {
     public void deletePost(Long postId, UserEntity user) {
         ReviewPostEntity e = postRepo.findById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
-        if (!e.getUser().getUserKey().equals(user.getUserKey())) {
+        if (!e.getUser().getUserId().equals(user.getUserId())) {
             throw new AccessDeniedException("삭제 권한이 없습니다.");
         }
         postRepo.delete(e);
     }
     //좋아요
-    public  ResponseEntity<? super PutFavoriteResponseDto> putFavorite(Long ReviewId,String username){
+    public  ResponseEntity<? super PutFavoriteResponseDto> putFavorite(Long ReviewPostId,String username){
         try {
             boolean existedUser = userRepo.existsByUsername(username);
             if(!existedUser) return PutFavoriteResponseDto.noExistUser();
-            ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewPostId(ReviewPostId);
             if(reviewPostEntity==null) return PutFavoriteResponseDto.noExistReview();
 
 
-            ReviewFavoriteEntity reviewFavoriteEntity = faRepo.findByReviewIdAndUsername(ReviewId,username);
+            ReviewFavoriteEntity reviewFavoriteEntity = faRepo.findByReviewPostIdAndUsername(ReviewPostId,username);
             if(reviewFavoriteEntity==null){
-                reviewFavoriteEntity = new ReviewFavoriteEntity(username,ReviewId);
+                reviewFavoriteEntity = new ReviewFavoriteEntity(username,ReviewPostId);
                 faRepo.save(reviewFavoriteEntity);
                 reviewPostEntity.increaseFavoriteCount();
             }
@@ -183,17 +185,17 @@ public class ReviewPostService {
         return PutFavoriteResponseDto.success();
     }
     //스크랩
-    public  ResponseEntity<? super PutScrapResponseDto> putScrap(Long ReviewId,String username){
+    public  ResponseEntity<? super PutScrapResponseDto> putScrap(Long ReviewPostId,String username){
         try {
             boolean existedUser = userRepo.existsByUsername(username);
             if(!existedUser) return PutScrapResponseDto.noExistUser();
-            ReviewPostEntity reviewPostEntity = postRepo.findByReviewId(ReviewId);
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewPostId(ReviewPostId);
             if(reviewPostEntity==null) return PutScrapResponseDto.noExistReview();
 
 
-            ReviewScrapEntity reviewScrapEntity = scRepo.findByReviewIdAndUsername(ReviewId,username);
+            ReviewScrapEntity reviewScrapEntity = scRepo.findByReviewPostIdAndUsername(ReviewPostId,username);
             if(reviewScrapEntity==null){
-                reviewScrapEntity = new ReviewScrapEntity(username,ReviewId);
+                reviewScrapEntity = new ReviewScrapEntity(username,ReviewPostId);
                 scRepo.save(reviewScrapEntity);
                 reviewPostEntity.increaseScrapCount();
             }
@@ -207,5 +209,44 @@ public class ReviewPostService {
             return ResponseDto.databaseError();
         }
         return PutScrapResponseDto.success();
+    }
+
+    //댓글작성
+    public ResponseEntity<? super ReviewCommentResponseDto> createComment(ReviewCommentRequestDto dto, Long ReviewPostId, String username){
+        try {
+            ReviewPostEntity reviewPostEntity = postRepo.findByReviewPostId(ReviewPostId);
+            if(reviewPostEntity==null) return ReviewCommentResponseDto.noExistReview();
+            boolean existedUser = userRepo.existsByUsername(username);
+            if(!existedUser) return ReviewCommentResponseDto.noExistUser();
+
+            ReviewCommentEntity comment = new ReviewCommentEntity();
+            comment.setContent(dto.getContent());
+            comment.setReviewPostId(reviewPostEntity);
+            comment.setUserId(userRepo.findByUsername(username).get());
+            coRepo.save(comment);
+
+            reviewPostEntity.increaseCommentCount();
+            postRepo.save(reviewPostEntity);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return ReviewCommentResponseDto.success();
+    }
+    //댓글조회
+    public ResponseEntity<? super GetCommentListResponseDto> getCommentList(Long ReviewPostId){
+        List<GetReviewCommentResultSet> resultSets = new ArrayList<>();
+        try {
+            boolean existedReview = postRepo.existsById(ReviewPostId);
+            if(!existedReview) return GetCommentListResponseDto.noExistReview();
+
+            resultSets = coRepo.getCommentList(ReviewPostId);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
+        return GetCommentListResponseDto.success(resultSets);
     }
 }

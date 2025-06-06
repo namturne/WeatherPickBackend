@@ -18,6 +18,6 @@ public class ReviewFavoriteEntity {
     @Id
     String username;
     @Id
-    Long reviewId;
+    Long reviewPostId;
 
 }

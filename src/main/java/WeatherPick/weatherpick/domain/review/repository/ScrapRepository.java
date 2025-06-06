@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ScrapRepository extends JpaRepository<ReviewScrapEntity, ScrapPk> {
-    ReviewScrapEntity findByReviewIdAndUsername(Long ReviewId, String username);
+    ReviewScrapEntity findByReviewPostIdAndUsername(Long ReviewPostId, String username);
 }

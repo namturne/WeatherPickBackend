@@ -15,6 +15,6 @@ public class ScrapPk {
 
     @Column(name = "username")
     private String username;
-    @Column(name = "reviewId")
-    private Long reviewId;
+    @Column(name = "reviewPostId")
+    private Long reviewPostId;
 }

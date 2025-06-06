@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewListItem {
-    private Long reviewId;
+    private Long reviewPostId;
     private String title;
     private int favoriteCount;
     private int viewCount;
@@ -22,7 +22,7 @@ public class ReviewListItem {
     private String writerNickname;
 
     public ReviewListItem(ReviewPostEntity reviewPostEntity){
-        this.reviewId = reviewPostEntity.getReviewId();
+        this.reviewPostId = reviewPostEntity.getReviewPostId();
         this.title = reviewPostEntity.getTitle();
         this.favoriteCount = reviewPostEntity.getLikeCount();
         this.viewCount = reviewPostEntity.getViewCount();

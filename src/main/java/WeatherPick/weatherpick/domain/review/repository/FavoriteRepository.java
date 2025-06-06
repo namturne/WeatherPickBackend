@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FavoriteRepository extends JpaRepository<ReviewFavoriteEntity, FavoritePk> {
-    ReviewFavoriteEntity findByReviewIdAndUsername(Long ReviewId,String username);
+    ReviewFavoriteEntity findByReviewPostIdAndUsername(Long ReviewPostId,String username);
 }

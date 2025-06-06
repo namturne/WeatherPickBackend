@@ -27,18 +27,20 @@ public class GetReviewResponseDto extends ResponseDto {
     private Integer viewCount;
     private Integer likeCount;
     private Integer commentCount;
+    private Integer scrapCount;
     private List<NPlaceDto> places;
 
     private GetReviewResponseDto(GetReviewPostResultSet resultSet, List<NaverPlaceEntity> naverPlaceEntities) {
         super(ResponseCode.SUCCESS, ResponseCode.SUCCESS);
-        this.id = resultSet.getReviewId();
+        this.id = resultSet.getReviewPostId();
         this.title = resultSet.getTitle();
         this.content = resultSet.getContent();
-        this.writeDate = resultSet.getWriteDate();
+        this.writeDate = resultSet.getWriteDateTime();
         this.writerNickname = resultSet.getWriterNickname();
         this.viewCount = resultSet.getViewCount();
         this.likeCount = resultSet.getLikeCount();
         this.commentCount = resultSet.getCommentCount();
+        this.scrapCount = resultSet.getScrapCount();
         this.places = naverPlaceEntities.stream()
                 .map(NPlaceDto::from)
                 .toList();

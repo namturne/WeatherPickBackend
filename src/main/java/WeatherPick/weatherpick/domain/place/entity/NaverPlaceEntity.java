@@ -40,6 +40,6 @@ public class NaverPlaceEntity {
     private String mapy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id")
+    @JoinColumn(name = "review")
     private ReviewPostEntity review;
 } 
