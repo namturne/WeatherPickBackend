@@ -2,6 +2,12 @@ package WeatherPick.weatherpick.domain.review.entity;
 
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 
 //리뷰 댓글
@@ -15,39 +21,27 @@ createddate	    DATETIME	작성 시간
  */
 
 @Entity
+@Getter
+@Setter
 public class ReviewCommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reviewcomment_id")
-    private Long id;
+    @Column(name = "reviewCommentId")
+    private Long reviewCommentId;
 
     @ManyToOne
-    @JoinColumn(name = "reviewpost_id", nullable = false)
-    private ReviewPostEntity post;
+    @JoinColumn(name = "reviewPostId", nullable = false)
+    private ReviewPostEntity reviewPostId;
 
     @ManyToOne
-    @JoinColumn(name = "user_key", nullable = false)
-    private UserEntity user;
+    @JoinColumn(name = "userId", nullable = false)
+    private UserEntity userId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate = new Date();
+    @UpdateTimestamp
+    private LocalDateTime writeDateTime;
 
-    // ─── getters/setters ───
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
-    public ReviewPostEntity getPost() { return post; }
-    public void setPost(ReviewPostEntity post) { this.post = post; }
-
-    public UserEntity getUser() { return user; }
-    public void setUser(UserEntity user) { this.user = user; }
-
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
-    public Date getCreatedDate() { return createdDate; }
-    public void setCreatedDate(Date createdDate) { this.createdDate = createdDate; }
 }

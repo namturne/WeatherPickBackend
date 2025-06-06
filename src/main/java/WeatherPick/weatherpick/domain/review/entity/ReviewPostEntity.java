@@ -33,8 +33,8 @@ createddate	    DATETIME	  작성 시간
 public class ReviewPostEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reviewpost_id")
-    private Long reviewId;
+    @Column(name = "reviewPostId")
+    private Long reviewPostId;
 
     @Column(nullable = false)
     private String title;
@@ -43,7 +43,7 @@ public class ReviewPostEntity {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_key", nullable = false)
+    @JoinColumn(name = "userId", nullable = false)
     private UserEntity user;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -61,7 +61,7 @@ public class ReviewPostEntity {
     private int commentCount =0;
 
     @Column
-    String writeDate = new SimpleDateFormat("yyyy-MM-dd").format(Date.from(Instant.now()));
+    String writeDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(Date.from(Instant.now()));
 
 
     public void increaseViewCount(){
@@ -76,8 +76,12 @@ public class ReviewPostEntity {
     public void increaseScrapCount(){
         this.scrapCount++;
     }
-    public void decreaseScrapCount(){
-        this.scrapCount--;
+    public void decreaseScrapCount(){this.scrapCount--;}
+    public void increaseCommentCount(){
+        this.commentCount++;
+    }
+    public void decreaseCommentCount(){
+        this.commentCount--;
     }
 
     public void addPlace(NaverPlaceEntity place) {

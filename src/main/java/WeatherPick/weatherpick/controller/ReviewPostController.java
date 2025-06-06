@@ -23,21 +23,20 @@ public class ReviewPostController {
     }
 
 
-
+    //리뷰생성
     @PostMapping("")
     public ResponseEntity<? super ReviewPostDto> createPost(
             @RequestBody @Valid ReviewPostRequestDto dto,
             @AuthenticationPrincipal String username) {
-        //ReviewPostDto saved = service.createPost(dto, username);
-        //return ResponseEntity.created(URI.create("/api/posts/" + saved.getId())).body(saved);
         return service.createPost(dto,username);
     }
+    //리뷰목록조회
     @GetMapping("/list")
     public ResponseEntity<? super GetReviewListResponseDto> getReviewList(){
         return service.getReviewList();
     }
 
-
+    //좋아요
     @PutMapping("/{postId}/favorite")
     public ResponseEntity<? super PutFavoriteResponseDto> putFavorite(
             @PathVariable("postId") Long reviewId,
@@ -46,6 +45,7 @@ public class ReviewPostController {
         return service.putFavorite(reviewId,username);
     }
 
+    //스크랩
     @PutMapping("/{postId}/scrap")
     public ResponseEntity<? super PutScrapResponseDto> putscrap(
             @PathVariable("postId") Long reviewId,
@@ -54,21 +54,14 @@ public class ReviewPostController {
         return service.putScrap(reviewId,username);
     }
 
-
+    //리뷰1개조회
     @GetMapping("/{postId}")
     public ResponseEntity<? super GetReviewResponseDto> getPost(
-            @PathVariable("postId") Long ReviewId
+            @PathVariable("postId") Long ReviewPostId
     ){
-        return service.getReview(ReviewId);
+        return service.getReview(ReviewPostId);
     }
 
-    @PutMapping("/{postId}")
-    public ResponseEntity<ReviewPostDto> updatePost(
-            @PathVariable Long postId,
-            @RequestBody ReviewPostDto dto,
-            @AuthenticationPrincipal UserEntity user) {
-        return ResponseEntity.ok(service.updatePost(postId, dto, user));
-    }
 
 
 
@@ -79,4 +72,21 @@ public class ReviewPostController {
         service.deletePost(postId, user);
         return ResponseEntity.noContent().build();
     }
+
+    //댓글
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<? super ReviewCommentResponseDto> createComment(
+                @RequestBody @Valid ReviewCommentRequestDto requestbody,
+                @PathVariable("postId") Long postId,
+                @AuthenticationPrincipal String username
+    ){
+        return service.createComment(requestbody,postId,username);
+    }
+    @GetMapping("/{postId}/comment-list")
+    public ResponseEntity<? super GetCommentListResponseDto> getCommentList(
+            @PathVariable("postId") Long postId
+    ){
+        return service.getCommentList(postId);
+    }
+
 }

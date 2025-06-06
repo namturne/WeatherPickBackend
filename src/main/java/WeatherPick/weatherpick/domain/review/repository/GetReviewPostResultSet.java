@@ -1,12 +1,11 @@
 package WeatherPick.weatherpick.domain.review.repository;
 
 public interface GetReviewPostResultSet {
-    Long getReviewId();
+    Long getReviewPostId();
     String getTitle();
     String getContent();
-    String getWriteDate();
+    String getWriteDateTime();
     String getWriterNickname();
-    String getWriterUsername();
     Integer getLikeCount();
     Integer getScrapCount();
     Integer getViewCount();

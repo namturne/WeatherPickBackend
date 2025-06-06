@@ -16,24 +16,16 @@ import java.util.List;
 @Getter
 @Setter
 public class ReviewPostDto extends ResponseDto {
-    //private Long id;
     private String title;
     private String content;
-    ///private int rating;
-    //private int scrapCount;
-    //private Date createdDate;
     private List<String> placeList;
 
     public ReviewPostDto() {super(ResponseCode.SUCCESS, ResponseMassage.SUCCESS);}
 
     public ReviewPostDto(String title, String content,List<String> placeList) {
         super(ResponseCode.SUCCESS, ResponseMassage.SUCCESS);
-        //this.id = id;
         this.title = title;
         this.content = content;
-        //this.rating = rating;
-        //this.scrapCount = scrapCount;
-        //this.createdDate = createdDate;
         this.placeList = placeList;
     }
 

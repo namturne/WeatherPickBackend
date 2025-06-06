@@ -15,6 +15,6 @@ import java.io.Serializable;
 public class FavoritePk implements Serializable {
     @Column(name="username")
     private String username;
-    @Column(name="reviewId")
-    private Long reviewId;
+    @Column(name="reviewPostId")
+    private Long reviewPostId;
 }

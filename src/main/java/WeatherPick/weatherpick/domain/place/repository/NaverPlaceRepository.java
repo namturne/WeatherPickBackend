@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface NaverPlaceRepository extends JpaRepository<NaverPlaceEntity, Long> {
-    List<NaverPlaceEntity> findByReview_ReviewId(Long reviewId);
+    List<NaverPlaceEntity> findByReview_ReviewPostId(Long reviewId);
 } 
