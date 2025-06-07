@@ -5,6 +5,7 @@ import WeatherPick.weatherpick.common.ResponseDto;
 import WeatherPick.weatherpick.common.ResponseMassage;
 import WeatherPick.weatherpick.domain.place.dto.NPlaceDto;
 import WeatherPick.weatherpick.domain.place.entity.NaverPlaceEntity;
+import WeatherPick.weatherpick.domain.review.entity.ImageEntity;
 import WeatherPick.weatherpick.domain.review.repository.GetReviewPostResultSet;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,8 +30,9 @@ public class GetReviewResponseDto extends ResponseDto {
     private Integer commentCount;
     private Integer scrapCount;
     private List<NPlaceDto> places;
+    private List<String> images;
 
-    private GetReviewResponseDto(GetReviewPostResultSet resultSet, List<NaverPlaceEntity> naverPlaceEntities) {
+    private GetReviewResponseDto(GetReviewPostResultSet resultSet, List<NaverPlaceEntity> naverPlaceEntities, List<ImageEntity> images) {
         super(ResponseCode.SUCCESS, ResponseCode.SUCCESS);
         this.id = resultSet.getReviewPostId();
         this.title = resultSet.getTitle();
@@ -44,10 +46,13 @@ public class GetReviewResponseDto extends ResponseDto {
         this.places = naverPlaceEntities.stream()
                 .map(NPlaceDto::from)
                 .toList();
+        this.images = images.stream()
+                .map(ImageEntity::getImage)
+                .toList();
     }
 
-    public static ResponseEntity<GetReviewResponseDto> success(GetReviewPostResultSet resultSet, List<NaverPlaceEntity> naverPlaceEntities) {
-        GetReviewResponseDto result = new GetReviewResponseDto(resultSet, naverPlaceEntities);
+    public static ResponseEntity<GetReviewResponseDto> success(GetReviewPostResultSet resultSet, List<NaverPlaceEntity> naverPlaceEntities, List<ImageEntity> images) {
+        GetReviewResponseDto result = new GetReviewResponseDto(resultSet, naverPlaceEntities, images);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 

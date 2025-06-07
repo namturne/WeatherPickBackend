@@ -22,5 +22,5 @@ public interface ResponseCode {
     String DATABASE_ERROR = "DBE";
     String API_ERROR  = "AE";
 
-
+    String NOT_EXIST_IMAGES = "NI";
 }

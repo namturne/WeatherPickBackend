@@ -1,5 +1,6 @@
 package WeatherPick.weatherpick.domain.review.dto;
 
+import WeatherPick.weatherpick.domain.review.entity.ImageEntity;
 import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class ReviewListItem {
     private int commentCount;
     private String writeDateTime;
     private String writerNickname;
+    private List<ImageEntity> images;
 
     public ReviewListItem(ReviewPostEntity reviewPostEntity){
         this.reviewPostId = reviewPostEntity.getReviewPostId();

@@ -49,6 +49,9 @@ public class ReviewPostEntity {
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NaverPlaceEntity> places = new ArrayList<>();
 
+    @OneToMany(mappedBy = "reviewPostEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageEntity> images = new ArrayList<>();
+
     @Column
     private int likeCount=0;
 

@@ -1,17 +1,28 @@
 package WeatherPick.weatherpick.domain.review.service;
 
 
+import WeatherPick.weatherpick.common.ResponseDto;
+import WeatherPick.weatherpick.domain.review.dto.ImageUrlListResponseDto;
+import WeatherPick.weatherpick.domain.review.entity.ImageEntity;
+import WeatherPick.weatherpick.domain.review.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import lombok.RequiredArgsConstructor;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FileService {
+
+    private final ImageRepository imageRepository;
 
     @Value("${file.path}")
     private String filePath;
@@ -56,5 +67,27 @@ public class FileService {
             return null;
         }
         return resource;
+    }
+
+    public ResponseEntity<? super ImageUrlListResponseDto> getImageUrlsByPostId(Long postId) {
+        try {
+            List<ImageEntity> images = imageRepository.findByReviewPostEntity_ReviewPostId(postId);
+            if (images.isEmpty()) return ImageUrlListResponseDto.success(null);
+
+            List<String> imageUrls = images.stream()
+                    .map(image -> {
+                        String imageUrl = image.getImage();
+                        if (imageUrl != null && !imageUrl.startsWith("http")) {
+                            imageUrl = "http://localhost:8080" + imageUrl;
+                        }
+                        return imageUrl;
+                    })
+                    .collect(Collectors.toList());
+
+            return ImageUrlListResponseDto.success(imageUrls);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
     }
 }
