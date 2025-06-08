@@ -25,6 +25,7 @@ public class GetReviewResponseDto extends ResponseDto {
     private String content;
     private String writeDate;
     private String writerNickname;
+    private String writerProfileImage;
     private Integer viewCount;
     private Integer likeCount;
     private Integer commentCount;
@@ -39,6 +40,7 @@ public class GetReviewResponseDto extends ResponseDto {
         this.content = resultSet.getContent();
         this.writeDate = resultSet.getWriteDateTime();
         this.writerNickname = resultSet.getWriterNickname();
+        this.writerProfileImage = resultSet.getWriterProfileImage();
         this.viewCount = resultSet.getViewCount();
         this.likeCount = resultSet.getLikeCount();
         this.commentCount = resultSet.getCommentCount();

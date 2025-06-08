@@ -4,4 +4,5 @@ public interface GetReviewCommentResultSet {
     String getNickname();
     String getWriteDateTime();
     String getContent();
+    String getProfileImage();
 }

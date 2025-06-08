@@ -29,6 +29,10 @@ public class FileService {
     @Value("${file.url}")
     private String fileUrl;
 
+    public String getFilePath() {
+        return filePath;
+    }
+
     public String upload(MultipartFile file){
         if(file.isEmpty()) return null;
 

@@ -21,6 +21,7 @@ public class ReviewListItem {
     private int commentCount;
     private String writeDateTime;
     private String writerNickname;
+    private String writerProfileImage;
     private List<ImageEntity> images;
 
     public ReviewListItem(ReviewPostEntity reviewPostEntity){
@@ -32,6 +33,7 @@ public class ReviewListItem {
         this.commentCount = reviewPostEntity.getCommentCount();
         this.writeDateTime = reviewPostEntity.getWriteDate();
         this.writerNickname = reviewPostEntity.getUser().getNickname();
+        this.writerProfileImage = reviewPostEntity.getUser().getProfileImage();
     }
     public static List<ReviewListItem> getList(List<ReviewPostEntity> reviewPostEntities){
         List<ReviewListItem> list = new ArrayList<>();

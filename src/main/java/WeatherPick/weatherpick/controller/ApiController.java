@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.management.remote.JMXAuthenticator;
 import java.util.Collections;
@@ -52,24 +53,19 @@ public class ApiController {
     }
 
 
-
-    // 회원정보 조회
+    //내정보 읽기
     @GetMapping("/{username}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable String username) {
-        if (userService.isAccess(username)) {
-            return ResponseEntity.ok(userService.readOneUser(username));
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<? super GetUserInfoResponseDto> getUser(@PathVariable("username") String username) {
+        return userService.getUserInfo(username);
     }
 
-    // 회원 수정
+    //내정보 수정
     @PutMapping("/{username}")
-    public ResponseEntity<String> updateUser(@PathVariable String username, @RequestBody UserRequestDto dto) {
-        if (userService.isAccess(username)) {
-            userService.updateOneUser(dto, username);
-            return ResponseEntity.ok("회원정보 수정 완료");
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음");
+    public ResponseEntity<? super UpdateUserResponseDto> updateUser(
+            @PathVariable("username") String username,
+            @ModelAttribute UpdateUserRequestDto dto
+    ) {
+        return userService.updateOneUser(dto, username);
     }
 
     // 회원 삭제
@@ -96,5 +92,5 @@ public class ApiController {
         return Collections.singletonMap("exists", exists);
     }
 
-    //
+
 }

@@ -1,10 +1,7 @@
 package WeatherPick.weatherpick.controller;
 
 
-import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserLoginDto;
-import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
+import WeatherPick.weatherpick.domain.user.dto.*;
 import WeatherPick.weatherpick.domain.user.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -68,23 +65,23 @@ public class UserController {
     }
 
 
-    // 회원 수정
-    @GetMapping("/user/update/{username}")
-    public String updatePage(@PathVariable("username") String username, Model model) {
-
-        // 본인 또는 ADMIN 권한만 접근 가능
-        if (userService.isAccess(username)) {
-            UserResponseDto dto = userService.readOneUser(username);
-            model.addAttribute("USER", dto);
-            return "update";
-        }
-
-        return "redirect:/login";
-    }
+//    // 회원 수정
+//    @GetMapping("/user/update/{username}")
+//    public String updatePage(@PathVariable("username") String username, Model model) {
+//
+//        // 본인 또는 ADMIN 권한만 접근 가능
+//        if (userService.isAccess(username)) {
+//            UserResponseDto dto = userService.readOneUser(username);
+//            model.addAttribute("USER", dto);
+//            return "update";
+//        }
+//
+//        return "redirect:/login";
+//    }
 
     // 회원 수정
     @PostMapping("/user/update/{username}")
-    public String updateProcess(@PathVariable("username") String username, UserRequestDto dto) {
+    public String updateProcess(@PathVariable("username") String username, UpdateUserRequestDto dto) {
 
         // 본인 또는 ADMIN 권한만 접근 가능
         if (userService.isAccess(username)) {

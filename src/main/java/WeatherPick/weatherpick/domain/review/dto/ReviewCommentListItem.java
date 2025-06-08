@@ -16,11 +16,13 @@ public class ReviewCommentListItem {
     private String nickName;
     private String content;
     private String writeDateTime;
+    private String profileImage;
 
     public ReviewCommentListItem(GetReviewCommentResultSet resultSet){
         this.nickName = resultSet.getNickname();
         this.content = resultSet.getContent();
         this.writeDateTime = resultSet.getWriteDateTime();
+        this.profileImage = resultSet.getProfileImage();
     }
     public static List<ReviewCommentListItem> copyList(List<GetReviewCommentResultSet> resultSets){
         List<ReviewCommentListItem> list = new ArrayList<>();

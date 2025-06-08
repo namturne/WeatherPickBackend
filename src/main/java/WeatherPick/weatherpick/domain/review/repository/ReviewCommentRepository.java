@@ -15,7 +15,8 @@ public interface ReviewCommentRepository extends JpaRepository<ReviewCommentEnti
                 "SELECT " +
                 "U.nickname AS nickname, " +
                 "DATE_FORMAT(C.writeDateTime, '%Y-%m-%d %H:%i') AS writeDateTime, " +
-                "C.content AS content " +
+                "C.content AS content, " +
+                "U.profileImage AS profileImage " +
                 "FROM db1.ReviewCommentEntity AS C " +
                 "INNER JOIN db1.UserEntity AS U " +
                 "ON C.userId = U.userId " +

@@ -1,17 +1,13 @@
 package WeatherPick.weatherpick.domain.user.service;
 
 import WeatherPick.weatherpick.common.ResponseDto;
-import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserInfoResponseDto;
-import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
+import WeatherPick.weatherpick.domain.review.service.FileService;
+import WeatherPick.weatherpick.domain.user.dto.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +16,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +31,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final FileService fileService;
 
     // 유저 접근 권한 체크
     public Boolean isAccess(String username) {
@@ -103,22 +102,26 @@ public class UserService implements UserDetailsService {
         //유저 저장
         userRepository.save(entity);
     }
-
-    //유저 한 명 읽기
+    //내정보 읽어오기
     @Transactional(readOnly = true)
-    public UserResponseDto readOneUser(String username){
-        UserEntity entity = userRepository.findByUsername(username).orElseThrow();
+    public ResponseEntity<? super GetUserInfoResponseDto> getUserInfo(String username) {
+        try {
+            UserEntity user = userRepository.findByUsername(username).get();
+            if (user == null) return GetUserInfoResponseDto.notExistUser();
 
-        UserResponseDto dto = new UserResponseDto();
-        dto.setUsername(entity.getUsername());
-        dto.setNickname(entity.getNickname());
-        dto.setEmail(entity.getEmail());
-        dto.setRole(entity.getRole().toString());
-        dto.setName(entity.getName());
-        dto.setPhonenumber(entity.getPhoneNumber());
-        dto.setCreatedate(entity.getCreatedate());
-        return dto;
+            return GetUserInfoResponseDto.success(
+                    user.getUsername(),
+                    user.getNickname(),
+                    user.getEmail(),
+                    user.getPhoneNumber(),
+                    user.getProfileImage()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
     }
+
 
     public ResponseEntity<? super UserInfoResponseDto> getInfoUser(String username){
         Optional<UserEntity> userEntity = Optional.empty();
@@ -157,20 +160,58 @@ public class UserService implements UserDetailsService {
 
     // 유저 한 명 수정
     @Transactional
-    public void updateOneUser(UserRequestDto dto, String username) {
+    public ResponseEntity<? super UpdateUserResponseDto> updateOneUser(UpdateUserRequestDto dto, String username) {
+        try {
+            UserEntity user = userRepository.findByUsername(username).get();
+            if (user == null) return UpdateUserResponseDto.notExistUser();
 
-        // 기존 유저 정보 읽기
-        UserEntity entity = userRepository.findByUsername(username).orElseThrow();
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            }
 
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            entity.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            if (dto.getNickname() != null && !dto.getNickname().isEmpty()) {
+                user.setNickname(dto.getNickname());
+            }
+
+            if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+                user.setEmail(dto.getEmail());
+            }
+
+            if (dto.getPhonenumber() != null && !dto.getPhonenumber().isEmpty()) {
+                user.setPhoneNumber(dto.getPhonenumber());
+            }
+
+            // 프로필 이미지 업로드 처리
+            if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
+                // 기존 프로필 이미지가 있다면 삭제
+                if (user.getProfileImage() != null) {
+                    String oldImagePath = user.getProfileImage().replace("http://localhost:8080/file/", "");
+                    File oldFile = new File(fileService.getFilePath() + oldImagePath);
+                    if (oldFile.exists()) {
+                        oldFile.delete();
+                    }
+                }
+
+                // 새 프로필 이미지 업로드
+                String imageUrl = fileService.upload(dto.getProfileImage());
+                if (imageUrl != null) {
+                    user.setProfileImage(imageUrl);
+                }
+            }
+
+            userRepository.save(user);
+
+            return UpdateUserResponseDto.success(
+                user.getUsername(),
+                user.getNickname(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getProfileImage()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
         }
-
-        if (dto.getNickname() != null && !dto.getNickname().isEmpty()) {
-            entity.setNickname(dto.getNickname());
-        }
-
-        userRepository.save(entity);
     }
 
     // 유저 한 명 삭제
@@ -189,6 +230,7 @@ public class UserService implements UserDetailsService {
                 .roles(entity.getRole().toString())
                 .build();
     }
+
 
 
 }
