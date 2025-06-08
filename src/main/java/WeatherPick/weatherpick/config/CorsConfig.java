@@ -16,6 +16,7 @@ public class CorsConfig {
         
         // 프론트엔드 도메인 허용
         config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("http://13.209.68.253:3000");
         
         // 모든 HTTP 메서드 허용
         config.addAllowedMethod("*");
