@@ -1,17 +1,14 @@
 package WeatherPick.weatherpick.domain.user.service;
 
 import WeatherPick.weatherpick.common.ResponseDto;
-import WeatherPick.weatherpick.domain.user.dto.SignRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserInfoResponseDto;
-import WeatherPick.weatherpick.domain.user.dto.UserRequestDto;
-import WeatherPick.weatherpick.domain.user.dto.UserResponseDto;
+import WeatherPick.weatherpick.domain.review.service.FileService;
+import WeatherPick.weatherpick.domain.review.service.S3Service;
+import WeatherPick.weatherpick.domain.user.dto.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +17,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,42 +32,9 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    // 유저 접근 권한 체크
-    public Boolean isAccess(String username) {
-
-        // 현재 로그인 되어 있는 유저의 username
-        String sessionUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        // 현재 로그인 되어 있는 유저의 role
-        String sessionRole = SecurityContextHolder.getContext().getAuthentication().getAuthorities().iterator().next().getAuthority();
-
-        // 수직적으로 ADMIN이면 무조건 접근 가능
-        if ("ROLE_ADMIN".equals(sessionRole)) {
-            return true;
-        }
-
-        // 수평적으로 특정 행위를 수행할 username에 대해 세션(현재 로그인한) username과 같은지
-        if (username.equals(sessionUsername)) {
-            return true;
-        }
-
-        // 나머지 다 불가
-        return false;
-    }
+    private final S3Service s3Service;
 
 
-    public boolean checkPassword(String username, String rawPassword) {
-        // 사용자의 유저 정보 조회
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-
-        // 유저가 없거나 비밀번호가 일치하지 않으면 false 반환
-        if (user.isEmpty()) {
-            return false;
-        }
-
-        // 저장된 암호화된 비밀번호와 사용자가 입력한 평문 비밀번호를 비교
-        return bCryptPasswordEncoder.matches(rawPassword, user.get().getPassword());
-    }
 
     //유저 한 명 생성
     @Transactional
@@ -103,22 +69,26 @@ public class UserService implements UserDetailsService {
         //유저 저장
         userRepository.save(entity);
     }
-
-    //유저 한 명 읽기
+    //내정보 읽어오기
     @Transactional(readOnly = true)
-    public UserResponseDto readOneUser(String username){
-        UserEntity entity = userRepository.findByUsername(username).orElseThrow();
+    public ResponseEntity<? super GetUserInfoResponseDto> getUserInfo(String username) {
+        try {
+            UserEntity user = userRepository.findByUsername(username).get();
+            if (user == null) return GetUserInfoResponseDto.notExistUser();
 
-        UserResponseDto dto = new UserResponseDto();
-        dto.setUsername(entity.getUsername());
-        dto.setNickname(entity.getNickname());
-        dto.setEmail(entity.getEmail());
-        dto.setRole(entity.getRole().toString());
-        dto.setName(entity.getName());
-        dto.setPhonenumber(entity.getPhoneNumber());
-        dto.setCreatedate(entity.getCreatedate());
-        return dto;
+            return GetUserInfoResponseDto.success(
+                    user.getUsername(),
+                    user.getNickname(),
+                    user.getEmail(),
+                    user.getPhoneNumber(),
+                    user.getProfileImage()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
     }
+
 
     public ResponseEntity<? super UserInfoResponseDto> getInfoUser(String username){
         Optional<UserEntity> userEntity = Optional.empty();
@@ -157,20 +127,54 @@ public class UserService implements UserDetailsService {
 
     // 유저 한 명 수정
     @Transactional
-    public void updateOneUser(UserRequestDto dto, String username) {
+    public ResponseEntity<? super UpdateUserResponseDto> updateOneUser(UpdateUserRequestDto dto, String username) {
+        try {
+            UserEntity user = userRepository.findByUsername(username).get();
+            if (user == null) return UpdateUserResponseDto.notExistUser();
 
-        // 기존 유저 정보 읽기
-        UserEntity entity = userRepository.findByUsername(username).orElseThrow();
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            }
 
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            entity.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+            if (dto.getNickname() != null && !dto.getNickname().isEmpty()) {
+                user.setNickname(dto.getNickname());
+            }
+
+            if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+                user.setEmail(dto.getEmail());
+            }
+
+            if (dto.getPhonenumber() != null && !dto.getPhonenumber().isEmpty()) {
+                user.setPhoneNumber(dto.getPhonenumber());
+            }
+
+            // 프로필 이미지 업로드 처리
+            if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
+                // 기존 프로필 이미지가 있다면 S3에서 삭제
+                if (user.getProfileImage() != null) {
+                    s3Service.deleteFile(user.getProfileImage());
+                }
+
+                // 새 프로필 이미지 업로드
+                String imageUrl = s3Service.upload(dto.getProfileImage());
+                if (imageUrl != null) {
+                    user.setProfileImage(imageUrl);
+                }
+            }
+
+            userRepository.save(user);
+
+            return UpdateUserResponseDto.success(
+                user.getUsername(),
+                user.getNickname(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getProfileImage()
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
         }
-
-        if (dto.getNickname() != null && !dto.getNickname().isEmpty()) {
-            entity.setNickname(dto.getNickname());
-        }
-
-        userRepository.save(entity);
     }
 
     // 유저 한 명 삭제
@@ -189,6 +193,7 @@ public class UserService implements UserDetailsService {
                 .roles(entity.getRole().toString())
                 .build();
     }
+
 
 
 }

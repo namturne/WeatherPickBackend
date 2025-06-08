@@ -1,5 +1,6 @@
 package WeatherPick.weatherpick.domain.review.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +14,9 @@ public class ReviewPostRequestDto {
     private String title;
     private String content;
     private List<PlaceDto> places;
+    
+    @JsonProperty("images")
+    private List<String> images;
 
     @Getter
     @Setter

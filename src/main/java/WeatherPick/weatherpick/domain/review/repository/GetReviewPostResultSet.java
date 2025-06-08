@@ -6,6 +6,7 @@ public interface GetReviewPostResultSet {
     String getContent();
     String getWriteDateTime();
     String getWriterNickname();
+    String getWriterProfileImage();
     Integer getLikeCount();
     Integer getScrapCount();
     Integer getViewCount();

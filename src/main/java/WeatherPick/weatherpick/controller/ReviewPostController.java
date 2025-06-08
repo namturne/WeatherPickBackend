@@ -22,7 +22,6 @@ public class ReviewPostController {
         return ResponseEntity.ok(service.getMyPosts(user.getUsername()));
     }
 
-
     //리뷰생성
     @PostMapping("")
     public ResponseEntity<? super ReviewPostDto> createPost(
@@ -30,10 +29,28 @@ public class ReviewPostController {
             @AuthenticationPrincipal String username) {
         return service.createPost(dto,username);
     }
+
     //리뷰목록조회
     @GetMapping("/list")
     public ResponseEntity<? super GetReviewListResponseDto> getReviewList(){
         return service.getReviewList();
+    }
+
+    //리뷰수정
+    @PutMapping("/{postId}")
+    public ResponseEntity<? super UpdateReviewResponseDto> updateReview(
+            @PathVariable("postId") Long reviewPostId,
+            @RequestBody UpdateReviewRequestDto dto,
+            @AuthenticationPrincipal String username) {
+        return service.updateReview(reviewPostId, dto, username);
+    }
+
+    //리뷰삭제
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<? super DeleteReviewResponseDto> deleteReview(
+            @PathVariable("postId") Long reviewPostId,
+            @AuthenticationPrincipal String username) {
+        return service.deleteReview(reviewPostId, username);
     }
 
     //좋아요
@@ -62,17 +79,6 @@ public class ReviewPostController {
         return service.getReview(ReviewPostId);
     }
 
-
-
-
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(
-            @PathVariable Long postId,
-            @AuthenticationPrincipal UserEntity user) {
-        service.deletePost(postId, user);
-        return ResponseEntity.noContent().build();
-    }
-
     //댓글
     @PostMapping("/{postId}/comment")
     public ResponseEntity<? super ReviewCommentResponseDto> createComment(
@@ -82,11 +88,11 @@ public class ReviewPostController {
     ){
         return service.createComment(requestbody,postId,username);
     }
+
     @GetMapping("/{postId}/comment-list")
     public ResponseEntity<? super GetCommentListResponseDto> getCommentList(
             @PathVariable("postId") Long postId
     ){
         return service.getCommentList(postId);
     }
-
 }

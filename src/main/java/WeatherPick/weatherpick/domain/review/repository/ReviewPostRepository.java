@@ -20,6 +20,7 @@ public interface ReviewPostRepository extends JpaRepository<ReviewPostEntity, Lo
             "R.content AS content, "+
             "R.writeDate AS writeDateTime, "+
             "U.nickname AS writerNickname, "+
+            "U.profileImage AS writerProfileImage, "+
             "U.username AS writerUsername, "+
             "R.likeCount AS likeCount, "+
             "R.scrapCount AS scrapCount, "+

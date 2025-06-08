@@ -23,5 +23,6 @@ public interface ResponseMassage {
     String DATABASE_ERROR = "Database error.";
     String API_ERROR  = "Api error";
 
+    String NOT_EXIST_IMAGES = "이미지가 존재하지 않습니다.";
 
 }

@@ -4,10 +4,7 @@ import WeatherPick.weatherpick.common.ResponseDto;
 import WeatherPick.weatherpick.domain.place.entity.NaverPlaceEntity;
 import WeatherPick.weatherpick.domain.place.repository.NaverPlaceRepository;
 import WeatherPick.weatherpick.domain.review.dto.*;
-import WeatherPick.weatherpick.domain.review.entity.ReviewCommentEntity;
-import WeatherPick.weatherpick.domain.review.entity.ReviewFavoriteEntity;
-import WeatherPick.weatherpick.domain.review.entity.ReviewPostEntity;
-import WeatherPick.weatherpick.domain.review.entity.ReviewScrapEntity;
+import WeatherPick.weatherpick.domain.review.entity.*;
 import WeatherPick.weatherpick.domain.review.repository.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
@@ -31,6 +28,8 @@ public class ReviewPostService {
     private final NaverPlaceRepository naverPlaceRepo;
     private final ScrapRepository scRepo;
     private final ReviewCommentRepository coRepo;
+    private final ImageRepository imageRepo;
+    private final S3Service s3Service;
 
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
@@ -42,10 +41,12 @@ public class ReviewPostService {
     public ResponseEntity<? super GetReviewResponseDto> getReview(Long ReviewPostId){
             GetReviewPostResultSet resultSet = null;
             List<NaverPlaceEntity> naverPlaceEntities = new ArrayList<>();
+            List<ImageEntity> images = new ArrayList<>();
         try{
             resultSet = postRepo.getReview(ReviewPostId);
             if(resultSet == null) return  GetReviewResponseDto.notExistReview();
             naverPlaceEntities = naverPlaceRepo.findByReview_ReviewPostId(ReviewPostId);
+            images = imageRepo.findByReviewPostEntity_ReviewPostId(ReviewPostId);
 
             ReviewPostEntity reviewPostEntity = postRepo.findByReviewPostId(ReviewPostId);
             reviewPostEntity.increaseViewCount();
@@ -54,7 +55,7 @@ public class ReviewPostService {
             e.printStackTrace();
             return ResponseDto.databaseError();
         }
-        return GetReviewResponseDto.success(resultSet,naverPlaceEntities);
+        return GetReviewResponseDto.success(resultSet, naverPlaceEntities, images);
     }
 
 
@@ -127,6 +128,18 @@ public class ReviewPostService {
                 naverPlaceRepo.saveAll(places);
             }
 
+            // 이미지 URL 저장
+            if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+                List<ImageEntity> images = new ArrayList<>();
+                for (String imageUrl : dto.getImages()) {
+                    ImageEntity image = new ImageEntity();
+                    image.setImage(imageUrl);
+                    image.setReviewPostEntity(savedPost);
+                    images.add(image);
+                }
+                imageRepo.saveAll(images);
+            }
+
             return ReviewPostDto.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -136,28 +149,113 @@ public class ReviewPostService {
 
     // 게시글 수정
     @Transactional
-    public ReviewPostDto updatePost(Long postId, ReviewPostDto dto, UserEntity user) {
-        ReviewPostEntity e = postRepo.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
-        if (!e.getUser().getUserId().equals(user.getUserId())) {
-            throw new AccessDeniedException("수정 권한이 없습니다.");
+    public ResponseEntity<? super UpdateReviewResponseDto> updateReview(Long reviewPostId, UpdateReviewRequestDto dto, String username) {
+        try {
+            // 사용자 존재 여부 확인
+            boolean existedUser = userRepo.existsByUsername(username);
+            if (!existedUser) return UpdateReviewResponseDto.notExistUser();
+
+            // 게시글 존재 여부 확인
+            ReviewPostEntity reviewPost = postRepo.findByReviewPostId(reviewPostId);
+            if (reviewPost == null) return UpdateReviewResponseDto.notExistReview();
+
+            // 권한 확인
+            if (!reviewPost.getUser().getUsername().equals(username)) {
+                return UpdateReviewResponseDto.noPermission();
+            }
+
+            // 게시글 정보 업데이트
+            reviewPost.setTitle(dto.getTitle());
+            reviewPost.setContent(dto.getContent());
+
+            // 장소 정보 업데이트
+            if (dto.getPlaces() != null) {
+                // 기존 장소 정보 삭제
+                naverPlaceRepo.deleteAll(reviewPost.getPlaces());
+                reviewPost.getPlaces().clear();
+
+                // 새로운 장소 정보 추가
+                List<NaverPlaceEntity> places = new ArrayList<>();
+                for (ReviewPostRequestDto.PlaceDto placeDto : dto.getPlaces()) {
+                    NaverPlaceEntity place = new NaverPlaceEntity();
+                    place.setTitle(placeDto.getTitle());
+                    place.setAddress(placeDto.getAddress());
+                    place.setRoadAddress(placeDto.getRoadAddress());
+                    place.setMapx(placeDto.getMapx());
+                    place.setMapy(placeDto.getMapy());
+                    place.setCategory(placeDto.getCategory());
+                    place.setLink(placeDto.getLink());
+                    place.setReview(reviewPost);
+                    places.add(place);
+                }
+                naverPlaceRepo.saveAll(places);
+            }
+
+            postRepo.save(reviewPost);
+            return UpdateReviewResponseDto.success();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
         }
-        e.setTitle(dto.getTitle());
-        e.setContent(dto.getContent());
-        //e.setRating(dto.getRating());
-        return toDto(postRepo.save(e));
     }
 
     // 게시글 삭제
     @Transactional
-    public void deletePost(Long postId, UserEntity user) {
-        ReviewPostEntity e = postRepo.findById(postId)
-                .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
-        if (!e.getUser().getUserId().equals(user.getUserId())) {
-            throw new AccessDeniedException("삭제 권한이 없습니다.");
+    public ResponseEntity<? super DeleteReviewResponseDto> deleteReview(Long reviewPostId, String username) {
+        try {
+            // 사용자 존재 여부 확인
+            boolean existedUser = userRepo.existsByUsername(username);
+            if (!existedUser) return DeleteReviewResponseDto.notExistUser();
+
+            // 게시글 존재 여부 확인
+            ReviewPostEntity reviewPost = postRepo.findByReviewPostId(reviewPostId);
+            if (reviewPost == null) return DeleteReviewResponseDto.notExistReview();
+
+            // 권한 확인
+            if (!reviewPost.getUser().getUsername().equals(username)) {
+                return DeleteReviewResponseDto.noPermission();
+            }
+
+            // 연관된 데이터 삭제
+
+            // 1. 이미지 엔티티 삭제
+            // 게시글에 연결된 이미지 엔티티들 조회
+            List<ImageEntity> images = imageRepo.findByReviewPostEntity_ReviewPostId(reviewPostId);
+            // 실제 이미지 파일 삭제 (S3)
+            for (ImageEntity image : images) {
+                String imagePath = image.getImage();
+                if (imagePath != null) {
+                    s3Service.deleteFile(imagePath);
+                }
+            }
+            imageRepo.deleteAll(images);
+
+
+            // 2. 장소 정보 삭제
+            naverPlaceRepo.deleteAll(reviewPost.getPlaces());
+            
+            // 3. 좋아요 삭제
+            faRepo.deleteAll(faRepo.findByReviewPostId(reviewPostId));
+            
+            // 4. 스크랩 삭제
+            scRepo.deleteAll(scRepo.findByReviewPostId(reviewPostId));
+            
+            // 5. 댓글 삭제
+            coRepo.deleteAll(coRepo.findByReviewPostId_ReviewPostId(reviewPostId));
+            
+            
+            // 6. 게시글 삭제
+            postRepo.delete(reviewPost);
+
+            return DeleteReviewResponseDto.success();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.databaseError();
         }
-        postRepo.delete(e);
     }
+
     //좋아요
     public  ResponseEntity<? super PutFavoriteResponseDto> putFavorite(Long ReviewPostId,String username){
         try {
