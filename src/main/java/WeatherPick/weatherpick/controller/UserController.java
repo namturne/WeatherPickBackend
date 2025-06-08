@@ -79,30 +79,30 @@ public class UserController {
 //        return "redirect:/login";
 //    }
 
-    // 회원 수정
-    @PostMapping("/user/update/{username}")
-    public String updateProcess(@PathVariable("username") String username, UpdateUserRequestDto dto) {
-
-        // 본인 또는 ADMIN 권한만 접근 가능
-        if (userService.isAccess(username)) {
-            userService.updateOneUser(dto, username);
-        }
-
-        return "redirect:/user/update/" + username;
-    }
-    // 회원 삭제
-    @PostMapping("/user/delete/{username}")
-    public String deleteProcess(@PathVariable("username") String username){
-        // 본인 또는 ADMIN 권한만 접근 가능
-        if (userService.isAccess(username)) {
-            userService.deleteOneUser(username);
-        }
-        else {
-            return "redirect:/user/update/" + username;
-        }
-        return "redirect:/login";
-
-    }
+//    // 회원 수정
+//    @PostMapping("/user/update/{username}")
+//    public String updateProcess(@PathVariable("username") String username, UpdateUserRequestDto dto) {
+//
+//        // 본인 또는 ADMIN 권한만 접근 가능
+//        if (userService.isAccess(username)) {
+//            userService.updateOneUser(dto, username);
+//        }
+//
+//        return "redirect:/user/update/" + username;
+//    }
+//    // 회원 삭제
+//    @PostMapping("/user/delete/{username}")
+//    public String deleteProcess(@PathVariable("username") String username){
+//        // 본인 또는 ADMIN 권한만 접근 가능
+//        if (userService.isAccess(username)) {
+//            userService.deleteOneUser(username);
+//        }
+//        else {
+//            return "redirect:/user/update/" + username;
+//        }
+//        return "redirect:/login";
+//
+//    }
 
 
     // 아이디 중복 확인

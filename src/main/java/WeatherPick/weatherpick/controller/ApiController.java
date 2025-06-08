@@ -68,15 +68,15 @@ public class ApiController {
         return userService.updateOneUser(dto, username);
     }
 
-    // 회원 삭제
-    @DeleteMapping("/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable String username) {
-        if (userService.isAccess(username)) {
-            userService.deleteOneUser(username);
-            return ResponseEntity.ok("삭제 완료");
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음");
-    }
+//    // 회원 삭제
+//    @DeleteMapping("/{username}")
+//    public ResponseEntity<String> deleteUser(@PathVariable String username) {
+//        if (userService.isAccess(username)) {
+//            userService.deleteOneUser(username);
+//            return ResponseEntity.ok("삭제 완료");
+//        }
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한 없음");
+//    }
 
     // 아이디 중복 확인
     @GetMapping("/check-username")

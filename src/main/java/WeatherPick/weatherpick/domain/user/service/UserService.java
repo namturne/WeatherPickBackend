@@ -2,6 +2,7 @@ package WeatherPick.weatherpick.domain.user.service;
 
 import WeatherPick.weatherpick.common.ResponseDto;
 import WeatherPick.weatherpick.domain.review.service.FileService;
+import WeatherPick.weatherpick.domain.review.service.S3Service;
 import WeatherPick.weatherpick.domain.user.dto.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
@@ -31,43 +32,9 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final FileService fileService;
-
-    // 유저 접근 권한 체크
-    public Boolean isAccess(String username) {
-
-        // 현재 로그인 되어 있는 유저의 username
-        String sessionUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        // 현재 로그인 되어 있는 유저의 role
-        String sessionRole = SecurityContextHolder.getContext().getAuthentication().getAuthorities().iterator().next().getAuthority();
-
-        // 수직적으로 ADMIN이면 무조건 접근 가능
-        if ("ROLE_ADMIN".equals(sessionRole)) {
-            return true;
-        }
-
-        // 수평적으로 특정 행위를 수행할 username에 대해 세션(현재 로그인한) username과 같은지
-        if (username.equals(sessionUsername)) {
-            return true;
-        }
-
-        // 나머지 다 불가
-        return false;
-    }
+    private final S3Service s3Service;
 
 
-    public boolean checkPassword(String username, String rawPassword) {
-        // 사용자의 유저 정보 조회
-        Optional<UserEntity> user = userRepository.findByUsername(username);
-
-        // 유저가 없거나 비밀번호가 일치하지 않으면 false 반환
-        if (user.isEmpty()) {
-            return false;
-        }
-
-        // 저장된 암호화된 비밀번호와 사용자가 입력한 평문 비밀번호를 비교
-        return bCryptPasswordEncoder.matches(rawPassword, user.get().getPassword());
-    }
 
     //유저 한 명 생성
     @Transactional
@@ -183,17 +150,13 @@ public class UserService implements UserDetailsService {
 
             // 프로필 이미지 업로드 처리
             if (dto.getProfileImage() != null && !dto.getProfileImage().isEmpty()) {
-                // 기존 프로필 이미지가 있다면 삭제
+                // 기존 프로필 이미지가 있다면 S3에서 삭제
                 if (user.getProfileImage() != null) {
-                    String oldImagePath = user.getProfileImage().replace("http://localhost:8080/file/", "");
-                    File oldFile = new File(fileService.getFilePath() + oldImagePath);
-                    if (oldFile.exists()) {
-                        oldFile.delete();
-                    }
+                    s3Service.deleteFile(user.getProfileImage());
                 }
 
                 // 새 프로필 이미지 업로드
-                String imageUrl = fileService.upload(dto.getProfileImage());
+                String imageUrl = s3Service.upload(dto.getProfileImage());
                 if (imageUrl != null) {
                     user.setProfileImage(imageUrl);
                 }

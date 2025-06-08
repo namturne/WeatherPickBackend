@@ -9,14 +9,12 @@ import WeatherPick.weatherpick.domain.review.repository.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,8 +29,7 @@ public class ReviewPostService {
     private final ScrapRepository scRepo;
     private final ReviewCommentRepository coRepo;
     private final ImageRepository imageRepo;
-    @Value("${file.path}")
-    private String uploadPath;
+    private final S3Service s3Service;
 
     private ReviewPostDto toDto(ReviewPostEntity e) {
         return new ReviewPostDto(
@@ -223,20 +220,13 @@ public class ReviewPostService {
             // 연관된 데이터 삭제
 
             // 1. 이미지 엔티티 삭제
-            
             // 게시글에 연결된 이미지 엔티티들 조회
             List<ImageEntity> images = imageRepo.findByReviewPostEntity_ReviewPostId(reviewPostId);
-            
-            // 실제 이미지 파일 삭제
+            // 실제 이미지 파일 삭제 (S3)
             for (ImageEntity image : images) {
                 String imagePath = image.getImage();
                 if (imagePath != null) {
-                    // URL에서 파일 경로 추출
-                    String filePath = imagePath.replace("http://localhost:8080/file/", "");
-                    File file = new File(uploadPath + filePath);
-                    if (file.exists()) {
-                        file.delete();
-                    }
+                    s3Service.deleteFile(imagePath);
                 }
             }
             imageRepo.deleteAll(images);
