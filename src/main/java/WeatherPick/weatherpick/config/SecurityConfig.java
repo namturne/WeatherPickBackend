@@ -50,7 +50,6 @@ public class SecurityConfig {
     public RoleHierarchy roleHierarchy(){
         return RoleHierarchyImpl.withRolePrefix("ROLE_")
                 .role(UserRoleType.ADMIN.toString()).implies(UserRoleType.USER.toString())
-
                 .build();
     }
     // 시큐리티 설정
@@ -69,10 +68,19 @@ public class SecurityConfig {
         // 접근 경로별 인가  설정 뭔가 단조롭지않음 기분탓인가
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/join","login","/","api/**","/user/check-username", "/user/check-email", "/file/**").permitAll() // login, /user/join 경로는 모든 사용자에게 허용
-                        .requestMatchers("/user/update/**").hasRole("USER") // /user/update/** 경로는 "USER" 역할을 가진 사용자만 허용.
+                        .requestMatchers(
+                            "/user/join",
+                            "/login",
+                            "/",
+                            "/api/user/join",
+                            "/api/user/login",
+                            "/api/user/check-username",
+                            "/api/user/check-email",
+                            "/api/user/check-nickname",
+                            "/file/**"
+                        ).permitAll()
+                        .requestMatchers("/user/update/**").hasRole("USER")
                         .anyRequest().authenticated()
-
                 );
 
 
