@@ -80,17 +80,28 @@ public class ApiController {
 
     // 아이디 중복 확인
     @GetMapping("/check-username")
-    public Map<String, Boolean> checkUsername(@RequestParam String username) {
+    public Map<String, Boolean> checkUsername(@RequestParam("username") String username) {
         boolean exists = userRepository.existsByUsername(username);
         return Collections.singletonMap("exists", exists);
     }
 
     // 이메일 중복 확인
     @GetMapping("/check-email")
-    public Map<String, Boolean> checkEmail(@RequestParam String email) {
+    public Map<String, Boolean> checkEmail(@RequestParam("email") String email) {
         boolean exists = userRepository.existsByEmail(email);
         return Collections.singletonMap("exists", exists);
     }
 
+    // 닉네임 중복 확인
+    @GetMapping("/check-nickname")
+    public Map<String, Boolean> checkNickname(@RequestParam("nickname") String nickname) {
+        boolean exists = userRepository.existsByNickname(nickname);
+        return Collections.singletonMap("exists", exists);
+    }
+
+    @GetMapping("scraps/{username}")
+    public ResponseEntity<?super UserScrapResponseDto> getUserScraps(@PathVariable("username") String username) {
+        return userService.getMyScraps(username);
+    }
 
 }

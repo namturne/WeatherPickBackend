@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 
 @Entity
@@ -47,8 +49,6 @@ public class UserEntity {
 
     @Column
     private String profileImage;
-
-
 
 
 

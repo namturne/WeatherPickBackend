@@ -7,6 +7,8 @@ import WeatherPick.weatherpick.domain.user.dto.*;
 import WeatherPick.weatherpick.domain.user.entity.UserEntity;
 import WeatherPick.weatherpick.domain.user.entity.UserRoleType;
 import WeatherPick.weatherpick.domain.user.repository.UserRepository;
+import WeatherPick.weatherpick.domain.review.repository.ReviewPostRepository;
+import WeatherPick.weatherpick.domain.review.repository.ReviewScrapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,6 +36,8 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final S3Service s3Service;
+    private final ReviewPostRepository reviewPostRepository;
+    private final ReviewScrapRepository reviewScrapRepository;
 
 
 
@@ -193,7 +198,27 @@ public class UserService implements UserDetailsService {
                 .roles(entity.getRole().toString())
                 .build();
     }
+    // 내가 스크랩한 글 조회
+    public ResponseEntity<? super UserScrapResponseDto> getMyScraps(String username) {
+        Optional<UserEntity> user = userRepository.findByUsername(username);
+        if(user.isEmpty()) return UserScrapResponseDto.notExistUser();
+
+        try {
+            List<UserScrapResponseDto.ScrapInfo> scraps = reviewScrapRepository.findByUsername(username).stream()
+                    .map(scrap -> new UserScrapResponseDto.ScrapInfo(
+                            scrap.getReviewPostId(),
+                            reviewPostRepository.findById(scrap.getReviewPostId())
+                                    .map(post -> post.getTitle())
+                                    .orElse("삭제된 게시글")
+                    ))
+                    .collect(Collectors.toList());
+            return UserScrapResponseDto.success(scraps);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseDto.databaseError();
+        }
 
 
+    }
 
 }
