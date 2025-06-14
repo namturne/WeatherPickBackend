@@ -94,7 +94,6 @@ public class ReviewPostService {
                 for (ReviewPostRequestDto.PlaceDto place : dto.getPlaces()) {
                     if (!StringUtils.hasText(place.getTitle()) ||
                         !StringUtils.hasText(place.getAddress()) ||
-                        !StringUtils.hasText(place.getRoadAddress()) ||
                         !StringUtils.hasText(place.getMapx()) ||
                         !StringUtils.hasText(place.getMapy())) {
                         return ResponseDto.databaseError();
