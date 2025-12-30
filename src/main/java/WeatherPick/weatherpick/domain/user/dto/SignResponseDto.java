@@ -28,4 +28,5 @@ public class SignResponseDto extends ResponseDto {
         ResponseDto result = new ResponseDto(ResponseCode.DUPLICATE_ID,ResponseMassage.DUPLICATE_ID);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
     }
+
 }
